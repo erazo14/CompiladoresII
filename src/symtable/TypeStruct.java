@@ -27,7 +27,7 @@ public class TypeStruct extends Simbolo{
 	
 	public boolean hasVar(String id){
 		for (Variable v:this.variables){
-			if (v.id.equals(id)){
+			if (v.id.equalsIgnoreCase(id)){
 				return true;
 			}
 		}
@@ -37,7 +37,7 @@ public class TypeStruct extends Simbolo{
 	
 	public Variable findVar(String id){
 		for (Variable v:this.variables){
-			if (v.id.equals(id)){
+			if (v.id.equalsIgnoreCase(id)){
 				return v;
 			}
 		}

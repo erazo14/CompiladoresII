@@ -12,11 +12,8 @@ import java.util.ArrayList;
  *
  * @author Armando
  */
-public class Funcion extends Simbolo{
-	public ArrayList<Parametro> parametros;
-	
-	public Funcion(String id, Integer linea, Integer columna, Integer offset, String tipo, ArrayList<Parametro> parametros) {
+public class Funcion extends Metodo{
+	public Funcion(String id, Integer linea, Integer columna, Integer offset, String tipo) {
 		super(id, linea, columna, offset, tipo);
-		this.parametros = parametros;
 	}
 }

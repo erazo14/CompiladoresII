@@ -22,6 +22,7 @@ public class Scope {
 	public ArrayList<Funcion> funciones;
 	public ArrayList<Sub> subs;
 	public ArrayList<TypeStruct> typeStructs;
+	private final ArrayList<String> primitiveTypes;
 	
 	public Scope(Scope padre, String nombre, Integer linea, Integer columna, Integer offset){
 		this.padre = padre;
@@ -33,11 +34,16 @@ public class Scope {
 		this.funciones = new ArrayList<>();
 		this.subs = new ArrayList<>();
 		this.typeStructs = new ArrayList<>();
+		this.primitiveTypes = new ArrayList<>();
+		this.primitiveTypes.add("integer");
+		this.primitiveTypes.add("string");
+		this.primitiveTypes.add("char");
+		this.primitiveTypes.add("boolean");
 	}
 	
 	public boolean hasVar(String id){
 		for (Variable v:this.variables){
-			if (v.id.equals(id)){
+			if (v.id.equalsIgnoreCase(id)){
 				return true;
 			}
 		}
@@ -51,7 +57,7 @@ public class Scope {
 	
 	public Variable findVar(String id){
 		for (Variable v:this.variables){
-			if (v.id.equals(id)){
+			if (v.id.equalsIgnoreCase(id)){
 				return v;
 			}
 		}
@@ -63,13 +69,33 @@ public class Scope {
 		}
 	}
 	
+	public boolean hasLocalVar(String id){
+		for (Variable v:this.variables){
+			if (v.id.equalsIgnoreCase(id)){
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public Variable findLocalVar(String id){
+		for (Variable v:this.variables){
+			if (v.id.equalsIgnoreCase(id)){
+				return v;
+			}
+		}
+		
+		return null;
+	}
+	
 	public void addVar(Variable var){
 		this.variables.add(var);
 	}
 	
 	public boolean hasFunc(String id){
 		for (Funcion f:this.funciones){
-			if (f.id.equals(id)){
+			if (f.id.equalsIgnoreCase(id)){
 				return true;
 			}
 		}
@@ -87,7 +113,7 @@ public class Scope {
 	
 	public boolean hasSub(String id){
 		for (Sub s:this.subs){
-			if (s.id.equals(id)){
+			if (s.id.equalsIgnoreCase(id)){
 				return true;
 			}
 		}
@@ -105,7 +131,7 @@ public class Scope {
 	
 	public boolean hasTypeStruct(String id){
 		for (TypeStruct t:this.typeStructs){
-			if (t.id.equals(id)){
+			if (t.id.equalsIgnoreCase(id)){
 				return true;
 			}
 		}
@@ -119,7 +145,7 @@ public class Scope {
 	
 	public TypeStruct findTypeStruct(String id){
 		for (TypeStruct t:this.typeStructs){
-			if (t.id.equals(id)){
+			if (t.id.equalsIgnoreCase(id)){
 				return t;
 			}
 		}
@@ -133,6 +159,26 @@ public class Scope {
 	
 	public void addTypeStruct(TypeStruct t){
 		this.typeStructs.add(t);
+	}
+	
+	public boolean hasType(String id){
+		for(String t:this.primitiveTypes){
+			if (t.equalsIgnoreCase(id)){
+				return true;
+			}
+		}
+		
+		for (TypeStruct t:this.typeStructs){
+			if (t.id.equalsIgnoreCase(id)){
+				return true;
+			}
+		}
+		
+		if (this.padre == null){
+			return false;
+		}else{
+			return this.padre.hasTypeStruct(id);
+		}
 	}
 	
 	public String ubicacion(){

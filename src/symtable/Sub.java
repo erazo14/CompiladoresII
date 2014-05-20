@@ -6,17 +6,12 @@
 
 package symtable;
 
-import java.util.ArrayList;
-
 /**
  *
  * @author Armando
  */
-public class Sub extends Simbolo{
-	public ArrayList<Parametro> parametros;
-	
-	public Sub(String id, Integer linea, Integer columna, Integer offset, ArrayList<Parametro> parametros) {
+public class Sub extends Metodo{
+	public Sub(String id, Integer linea, Integer columna, Integer offset) {
 		super(id, linea, columna, offset, "void");
-		this.parametros = parametros;
 	}
 }

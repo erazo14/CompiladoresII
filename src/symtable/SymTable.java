@@ -16,6 +16,7 @@ public final class SymTable {
 	public static Scope rootScope;
 	public static Scope curScope;
 	public static TypeStruct curTypeStruct;
+	public static Metodo curMethod;
 	public static Boolean existeMain;
 	public static Integer blockCounter;
 	private static ArrayList<Scope> scopes = new ArrayList<>();
@@ -28,6 +29,7 @@ public final class SymTable {
 		SymTable.rootScope = SymTable.createScope(null, "root", 0, 0, 0);
 		SymTable.curScope = rootScope;
 		SymTable.curTypeStruct = null;
+		SymTable.curMethod = null;
 		SymTable.existeMain = false;
 		SymTable.blockCounter = 1;
 	}
