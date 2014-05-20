@@ -1,0 +1,527 @@
+/* ----------------------Preliminary Declarations Section--------------------*/
+
+package parser;
+import java_cup.runtime.*;
+import java.util.*;
+import javax.swing.JOptionPane;
+import lexer.VbLexer;
+import parser.VbSyntaxError;
+import parser.sym;
+import symtable.*;
+import org.fife.ui.rsyntaxtextarea.parser.Parser;
+import org.fife.ui.rsyntaxtextarea.parser.ExtendedHyperlinkListener;
+import org.fife.ui.rsyntaxtextarea.parser.ParseResult;
+import org.fife.ui.rsyntaxtextarea.parser.ParserNotice;
+
+/*
+scan with {:
+	Symbol symbol = null;
+	while (symbol == null || symbol.sym == sym.error){
+		symbol = getScanner().next_token();
+		if (symbol.sym == sym.error){
+			MyToken mySymbol = (MyToken)symbol;
+			String msg = "Error en linea " + mySymbol.left; 
+			addErr(msg, mySymbol.left, mySymbol.right, mySymbol.offset, mySymbol.value.toString().length());
+			if (mySymbol.value.toString().equalsIgnoreCase("runaway string")){
+				appendErr("Cadena no cerrada");
+			}else{
+				appendErr("Caracter invalido '" + mySymbol.value.toString() + "'");
+			}
+		}
+	}
+
+	return symbol != null ? symbol : getSymbolFactory().newSymbol("END_OF_FILE", EOF_sym());
+:}
+*/
+parser code {: 
+	private VbLexer lexer;
+	private ArrayList<VbSyntaxError> errLst = new ArrayList<>();
+
+	public VbParser(VbLexer lex) {
+		super(lex);
+		this.lexer = lex;
+	}
+
+	public void user_init(){
+		this.errLst = new ArrayList<>();
+		SymTable.init();
+	}
+
+	public Symbol getCurToken(){
+		return this.cur_token;
+	}
+
+	public void report_fatal_error(String message, Object info) throws Exception{
+		done_parsing();
+		report_error(message, info);
+		throw new Exception("Can't recover from previous error(s)");
+	}
+
+	public void report_error(String message, Object info){
+		System.err.print(message);
+		System.err.flush();
+		if ((info instanceof Symbol)){
+		  if (((Symbol)info).left != -1){
+			System.err.println(" at character " + ((Symbol)info).left + " of input");
+		  }else{
+			System.err.println("");
+		  }
+		}else{
+		  System.err.println("");
+	   }
+	}
+
+	public void syntax_error(Symbol cur_token){
+		System.out.println("syntax_error");
+		try{
+			MyToken my_cur_token = (MyToken)cur_token;
+			String msg = "Error en linea " + my_cur_token.left + ", ";
+			
+			if (my_cur_token.value.toString().contains("\n") || my_cur_token.value.toString().contains("\r")){
+				msg += "columna " + my_cur_token.right;
+			}else{
+				msg += "token '" + my_cur_token.value.toString() + "'";
+			}
+
+			addErr(msg, my_cur_token.left, my_cur_token.right, my_cur_token.offset, cur_token.value.toString().length());
+		}catch(Exception ex){
+			System.out.println("1cur_token '" + cur_token + "' no se pudo convertir a mysymbol: " + cur_token.toString() + ", left: " + cur_token.left + ", right: " + cur_token.right);
+		}
+	}
+
+	public void unrecovered_syntax_error(Symbol cur_token) throws Exception{
+		System.out.println("unrec_syntax_error");
+		try{
+			MyToken my_cur_token = (MyToken)cur_token;
+			String msg = "Error fatal en linea " + my_cur_token.left + ", ";
+			
+			if (my_cur_token.value.toString().contains("\n") || my_cur_token.value.toString().contains("\r")){
+				msg += "columna " + my_cur_token.right;
+			}else{
+				msg += "token '" + my_cur_token.value.toString() + "'";
+			}
+
+			addErr(msg, my_cur_token.left, my_cur_token.right, my_cur_token.offset, cur_token.value.toString().length());
+		}catch(Exception ex){
+			System.out.println("2unrec cur_token no se pudo convertir a mysymbol: " + cur_token.toString() + ", left: " + cur_token.left + ", right: " + cur_token.right);
+		}
+	}
+
+	protected int error_sync_size(){
+		return 3;
+	}
+	
+	public void addErr(String msg, int left, int right, int offset, int length){
+		this.errLst.add(new VbSyntaxError(msg, left, right, offset, length));
+	}
+
+	public void appendErr(String msg){
+		if (!this.errLst.isEmpty()){
+			int index = this.errLst.size() - 1;
+			this.errLst.get(index).message += ": " + msg;
+		}
+	}
+
+	public ArrayList getErrLst(){
+		return this.errLst;
+	}
+
+	public void setLexer(VbLexer lexer){
+		this.lexer = lexer;
+	}
+
+	public MyToken tokenAt(java.util.Stack stack, int top, int offset){
+		return (MyToken)stack.elementAt(top + offset);
+	}
+
+	public MyToken toMyToken(Object o){
+		return (MyToken)o;
+	}
+:};
+
+terminal			Dim,Mas,Menos,Por,Entre,Menor,Mayor,Not,And,Or,
+					For,To,Step,Next,Loop,Do,While,Until,If,Then,Else,ElseIf,End,Integer,
+					Boolean,Char,String,ByVal,ByRef,As,Sub,Function,
+					Write,Writeln,Coma,Punto,ParI,ParD,True,GuionBajo,Igual,Id,
+					CambioDeLinea,Concatenar,InicioDeLinea,NuevaLinea,MayorIgual,
+					MenorIgual,False,Call,Exit,Input,Type,Ampersand;
+
+terminal			Public,Private;
+//non terminal		AccessMod;
+
+terminal			IntLiteral, StrLiteral;
+
+terminal			FinDeLinea;
+
+non terminal		ProgStart, Root, RootStmts, RootStmt, RootDecl, VarDecl ,
+					Block, BlockStmts, BlockStmt, BlockDecl, IdLst,
+					FuncDecl, FuncBody, SubDecl, SubBody, ArgDecl, ArgLst, Tipo;
+
+non terminal		MainDecl, MainHead, MainBody;
+
+non terminal		TypeDecl, TypeBlock, TypeBlockStmts, TypeVarDecl;
+
+non terminal		Asignable, Asignacion, Comparacion, Condicion, Expresion, Termino, Operador;
+
+non terminal		ForLoop, DoWhile, IfStmt, ElseStmts;
+
+non terminal		Args;
+
+non terminal		PassMech;
+
+non terminal		ArrayList<Parametro> Params, ParamLst;
+
+non terminal		Distinto, BoolLiteral;
+
+non terminal		MethodCall, FuncEval, LineEnd;
+
+non terminal		Property, PropChain;
+
+/* -------------Precedence and Associatively of Terminals Section----------- 
+precedence left MAS, MENOS;
+precedence left POR, DIV;
+precedence left IGUAL;
+*/
+
+precedence right Not;
+
+start with ProgStart;
+
+/*-----------------------------------------------------------------*/
+/* ----------------------------Grammar Section-------------------- */
+/*-----------------------------------------------------------------*/
+
+ProgStart				::= Root;
+
+
+
+/* ROOT */
+
+Root					::= RootStmts | LineEnd RootStmts;
+
+RootStmts				::= RootStmt
+						|	RootStmts RootStmt;
+
+RootStmt				::= RootDecl | error {: parser.appendErr("error"); :};
+
+RootDecl				::= VarDecl
+						|	SubDecl
+						|	FuncDecl
+						|	TypeDecl;
+
+VarDecl					::= Dim Id:id As Tipo:tipo LineEnd {: 
+								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-3);
+								SymTable.curScope.addVar(new Variable(myid.value.toString(), myid.left, myid.right, myid.offset, tipo.toString()));
+						:}
+						|	Dim error LineEnd {: parser.appendErr("Se esperaba Id"); :}
+						|	Dim Id error LineEnd {: parser.appendErr("Se esperaba 'As'"); :}
+						|	Dim Id As error LineEnd {: parser.appendErr("Se esperaba Tipo"); :};
+
+SubDecl					::= Sub Id:id Params:params {: 
+								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+								if (myid.value.toString().toLowerCase().equals("main")){
+									if (SymTable.existeMain){
+										parser.syntax_error(myid);
+										parser.appendErr("Sub Main ya fue declarado");
+									}else{
+										SymTable.existeMain = true;
+									}
+								}
+
+								SymTable.curScope.addSub(new Sub(myid.value.toString(), myid.left, myid.right, myid.offset, params));
+								
+								Scope s = SymTable.createSubScope(myid.value.toString(), myid.left, myid.right, myid.offset);
+								
+								for (Parametro p:params){
+									s.addVar(new Variable(p.id, null, null, null, p.tipo));
+								}
+						:} Block End Sub LineEnd {:
+								SymTable.endScope();
+						:}
+						|   Sub error {: parser.appendErr("Se esperaba Id"); :}
+						|	Sub Id error {: parser.appendErr("Se esperaban parametros"); :}
+						|	Sub Id Params error {: parser.appendErr("Se esperaba bloque"); :};
+
+FuncDecl				::= Function Id:id Params:params As Tipo:tipo {: 
+								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-3);
+								SymTable.curScope.addFunc(new Funcion(myid.value.toString(), myid.left, myid.right, myid.offset, tipo.toString(), params));
+								
+								Scope s = SymTable.createSubScope(myid.value.toString(), myid.left, myid.right, myid.offset);
+								
+								for (Parametro p:params){
+									s.addVar(new Variable(p.id, null, null, null, p.tipo));
+								} 
+						:} Block End Function LineEnd {:
+								SymTable.endScope();
+						:}
+						|   Function error {: parser.appendErr("Se esperaba Id"); :}
+						|	Function Id error {: parser.appendErr("Se esperaban parametros"); :}
+						|	Function Id Params error {: parser.appendErr("Se esperaba 'As'"); :}
+						|	Function Id Params As error {: parser.appendErr("Se esperaba Tipo"); :};
+
+TypeDecl				::= Type Id:id {: 
+								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+								TypeStruct t = new TypeStruct(myid.value.toString(), myid.left, myid.right, myid.offset);
+								SymTable.curTypeStruct = t;
+								SymTable.curScope.addTypeStruct(t);
+						:} TypeBlock End Type LineEnd {:
+								SymTable.curTypeStruct = null;
+						:};
+
+TypeBlock				::= LineEnd TypeBlockStmts | LineEnd;
+
+TypeBlockStmts			::= TypeVarDecl
+						|	TypeBlockStmts TypeVarDecl;
+
+TypeVarDecl				::= Id:id As Tipo:tipo LineEnd {:
+								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-3);
+								Variable v = new Variable(myid.value.toString(), myid.left, myid.right, myid.offset, tipo.toString());
+								SymTable.curTypeStruct.variables.add(v);
+						:};/*
+						|	Id error LineEnd {: parser.appendErr("Se esperaba 'As'"); :}
+						|	Id As error LineEnd {: parser.appendErr("Se esperaba Tipo"); :}
+						|	Id As Tipo error LineEnd {: parser.appendErr("Se esperaba fin de linea"); :}
+						|	error TypeVarDecl {: parser.appendErr("Sentencia invalida dentro de Type"); :};*/
+
+
+
+/* BLOCK */
+
+Block					::= LineEnd BlockStmts 
+						|	LineEnd;
+
+BlockStmts				::= BlockStmt
+						|	BlockStmts BlockStmt;
+
+BlockStmt				::= VarDecl
+						|	ForLoop
+						|	DoWhile
+						|	IfStmt
+						|	Asignacion
+						|	MethodCall;
+
+
+
+/* Asignacion, Comparacion, Expresiones etc */
+
+Asignable				::= Id {:
+								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+								Variable v = SymTable.curScope.findVar(myid.value.toString());
+
+								if (v == null){
+									parser.syntax_error(myid);
+									parser.appendErr("La variable \"" + myid.value.toString() + "\" no ha sido declarada");
+								}else{
+									RESULT = new Asignable("variable", v.tipo);
+								}
+						:}
+						|	Property:property {:
+								String[] segments = property.toString().split("\\.");
+								
+								//Symbol sym = (Symbol)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+								//MyToken myid = new MyToken(sym.sym, sym.left, sym.right, 0, sym.value);
+
+								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+								//MyToken myid = property;
+								Variable v = SymTable.curScope.findVar(segments[0]);
+
+								if (v == null){
+									parser.syntax_error(myid);
+									parser.appendErr("La variable \"" + segments[0] + "\" no ha sido declarada");
+								}else{
+									switch(v.tipo){
+										case "integer":
+										case "string":
+										case "boolean":
+										case "char":
+											parser.syntax_error(myid);
+											parser.appendErr("La variable \"" + v.id + "\" no es un Type");
+											break;
+										default:
+											TypeStruct t = SymTable.curScope.findTypeStruct(v.tipo);
+											
+											for (int i = 1; i < segments.length; i++){
+												Variable prop = t.findVar(segments[i]);
+
+												if (prop == null){
+													parser.syntax_error(myid);
+													parser.appendErr("El Type \"" + t.id + "\" no tiene una propiedad llamada \"" + segments[i] + "\"");
+													break;
+												}else{
+													if (prop.tipo.equals("integer") || prop.tipo.equals("string") || prop.tipo.equals("boolean") || prop.tipo.equals("char")){
+														if (i < segments.length - 1){
+															parser.syntax_error(myid);
+															parser.appendErr("La propiedad \"" + prop.id + "\" del Type \"" + t.id + " es de tipo \"" + prop.tipo + "\" y no tiene propiedades");
+															break;
+														}
+													}else{
+														t = SymTable.curScope.findTypeStruct(prop.tipo);
+													}
+												}
+
+												if (i == segments.length - 1){
+													RESULT = new Asignable("property", prop.tipo);
+												}
+											}
+									}
+								}
+						:};
+
+
+Asignacion				::= Asignable Igual Expresion LineEnd;
+
+Comparacion				::= Expresion Igual Expresion;
+
+Condicion				::= Expresion
+						|	Comparacion;
+
+Expresion				::= Termino
+						|	Not Termino
+						|	Expresion Operador Termino
+						|	Expresion Operador GuionBajo LineEnd Termino;
+
+Termino					::= IntLiteral
+						|	BoolLiteral
+						|	StrLiteral
+						|	Id
+						|	FuncEval
+						|	Property
+						|	ParI Expresion ParD;
+
+Operador				::= Mas
+						|	Menos
+						|	Por
+						|	Entre
+						|	And
+						|	Or
+						|	Not
+						|	Menor
+						|	MenorIgual
+						|	Mayor
+						|	MayorIgual
+						|	Distinto
+						|	Ampersand;
+
+
+
+/* Estructuras */
+
+ForLoop					::= For Id Igual Expresion To Expresion Block Next Id LineEnd
+						|	For error LineEnd {: parser.appendErr("Se esperaba Id"); :}
+						|	For Id error LineEnd {: parser.appendErr("Se esperaba '='"); :}
+						|	For Id Igual error {: parser.appendErr("Se esperaba Expresion"); :}
+						|	For Id Igual Expresion error LineEnd {: parser.appendErr("Se esperaba 'To'"); :}
+						|	For Id Igual Expresion To error LineEnd {: parser.appendErr("Se esperaba expresion"); :}
+						|	For Id Igual Expresion To Expresion error LineEnd {: parser.appendErr("Se esperaba fin de linea"); :}
+						|	For Id Igual Expresion To Expresion Block error LineEnd {: parser.appendErr("Se esperaba Next Id"); :};
+
+DoWhile					::= Do While Condicion Block Loop LineEnd
+						|	Do error LineEnd {: parser.appendErr("Se esperaba 'While'"); :}
+						|	Do While error LineEnd {: parser.appendErr("Se esperaba Condicion"); :}
+						|	Do While Condicion error LineEnd{: parser.appendErr("Se esperaba fin de linea"); :}
+						|	Do While Condicion Block error LineEnd {: parser.appendErr("Se esperaba 'Loop'"); :};
+
+IfStmt					::= If Condicion Then {:
+								MyToken ifTok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
+								SymTable.createSubScope("If" + SymTable.blockName(), ifTok.left, ifTok.right, ifTok.offset); 
+						:} Block {: 
+								SymTable.endScope();
+						:} ElseStmts End If LineEnd;
+
+ElseStmts				::= ElseIf Condicion Then {: 
+								MyToken myelif = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
+								SymTable.createSubScope("ElseIf" + SymTable.blockName(), myelif.left, myelif.right, myelif.offset); 
+						:} Block {: 
+								SymTable.endScope();
+						:} ElseStmts
+						|	Else {: 
+								MyToken elseTok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+								SymTable.createSubScope("Else" + SymTable.blockName(), elseTok.left, elseTok.right, elseTok.offset); 
+						:} Block {: 
+								SymTable.endScope();
+						:}
+						|	/* lambda */;
+
+
+/* Tipos */
+
+Tipo					::= Integer	{: RESULT = "integer"; :}
+						|	Boolean {: RESULT = "boolean"; :}
+						|	String {: RESULT = "string"; :}
+						|	Char {: RESULT = "char"; :}
+						|	Id:id {: RESULT = id; :};
+
+/*AccessMod				::= Public
+						|	Private;*/
+
+
+
+/* Argumentos y Parametros */
+
+Params					::= ParI ParD {: RESULT = new ArrayList<Parametro>(); :}
+						|	ParI ParamLst:paramLst ParD {: RESULT = paramLst; :}
+						|	ParI error ParD {: parser.appendErr("Parametros invalidos"); :}
+						|	ParI error {: parser.appendErr("Se esperaban parametros"); :};
+						
+
+ParamLst				::= PassMech:passMech Id:id As Tipo:tipo {:
+								ArrayList<Parametro> params = new ArrayList<>();
+								Parametro p = new Parametro(passMech.toString(), id.toString(), tipo.toString());
+								params.add(p);
+								RESULT = params;
+						:}
+						|	ParamLst:paramLst Coma PassMech:passMech Id:id As Tipo:tipo {:
+								ArrayList<Parametro> params = new ArrayList<>();
+								Parametro p = new Parametro(passMech.toString(), id.toString(), tipo.toString());
+								paramLst.add(p);
+								RESULT = paramLst;
+						:}
+						|	ParamLst Coma error {: parser.appendErr("Se esperaba Parametro"); :}
+						|	PassMech error {: parser.appendErr("Se esperaba Id"); :}
+						|	PassMech Id error {: parser.appendErr("Se esperaba 'As'"); :}
+						|	PassMech Id As error {: parser.appendErr("Se esperaba Tipo"); :};
+
+PassMech				::= ByVal:byVal {: RESULT = byVal.toString().toLowerCase(); :}
+						|	ByRef:byRef {: RESULT = byRef.toString().toLowerCase(); :};
+
+
+
+/* Cositas... */
+
+BoolLiteral				::= True
+						|	False;
+
+Distinto				::= Menor Mayor;
+
+MethodCall				::= FuncEval LineEnd
+						|	Call FuncEval LineEnd;
+
+FuncEval				::= Id Args;
+
+Args					::= ParI ParD
+						|	ParI ArgLst ParD
+						|	ParI ArgLst error {: parser.appendErr("Se esperaba ')'"); :}
+						|	ParI error ParD {: parser.appendErr("Argumentos invalidos"); :};
+
+ArgLst					::= Expresion
+						|	ArgLst Coma Expresion
+						|	ArgLst Coma error {: parser.appendErr("Se esperaba Argumento"); :};
+
+/*Args					::= Expresion
+						|	Args Coma Expresion
+						|	 lambda; ;*/
+
+
+
+Property				::= Id:id PropChain:propChain {:
+								RESULT = id.toString() + propChain;
+						:};
+
+PropChain				::= Punto Id:id {:
+								RESULT = "." + id.toString();
+						:}
+						|	Punto Id:id PropChain:propChain {:
+								RESULT = "." + id.toString() + propChain;
+						:};
+
+LineEnd					::= FinDeLinea | FinDeLinea LineEnd;

@@ -1,0 +1,242 @@
+package lexer;
+import java_cup.runtime.*;
+import parser.sym;
+import parser.MyToken;
+%%
+
+%class VbLexer
+%unicode
+%line
+%column
+%char
+%cup
+%ignorecase
+%public
+%state CADENA
+%state COMENTARIO
+
+%{
+	private StringBuffer strBuff = new StringBuffer("");
+
+	private MyToken symbol(int type) { 
+		return new MyToken(type, yyline + 1, yycolumn + 1, yychar); 
+	}
+
+	private MyToken symbol(int type, Object value) { 
+		return new MyToken(type, yyline + 1, yycolumn + 1, yychar, value); 
+	}
+%}
+
+
+/* Tipos */
+
+Integer 			= "Integer"
+Boolean 			= "Boolean"
+Char				= "Char"
+String				= "String"
+Type				= "Type"
+
+
+/* Funciones */
+
+Sub					= "Sub"
+Function			= "Function"
+Exit				= "Exit"
+Call				= "Call"
+ByRef				= "ByRef"
+ByVal				= "ByVal"
+
+
+
+/* Declaraciones */
+
+Dim					= "Dim"
+As					= "As"
+Public				= "Public" 
+Private				= "Private"
+
+
+
+/* Asignacion y comparacion de igualdad */
+
+Igual   			= "="
+
+
+
+/* operadores artimenticos */
+
+Mas 				= "+"
+Menos 				= "-"
+Por 				= "*"
+Entre 				= "/"
+
+
+
+/* Operadores logicos */
+
+Mayor 				= ">"
+MayorIgual 			= ">="
+Menor 				= "<"
+MenorIgual 			= "<="
+And					= "And"
+Or					= "Or"
+Not					= "Not"
+
+
+
+/* Estrucutras de control de flujo */
+
+For					= "For"
+To					= "To"
+Step				= "Step"
+Next				= "Next"
+Loop				= "Loop"
+Do					= "Do"
+While				= "While"
+Until				= "Until"
+If					= "If"
+Then				= "Then"
+Else				= "Else"
+ElseIf				= "ElseIf"
+End					= "End"
+
+
+
+/* Literales */
+
+True				= "True"
+False				= "False"
+IntLiteral			= 0|[1-9][0-9]*
+
+
+
+/* misc */
+
+Coma				= ","
+Punto				= "."     
+ParI				= "("   
+ParD				= ")"   
+GuionBajo			= "_"{1}
+Ampersand			= "&"
+Comilla				= "\""
+Apostrofe			= "'"
+
+Id					= [a-zA-Z_]([a-zA-Z_0-9]*)
+
+FinDeLinea			= [\r|\n|\r\n]+
+WhiteSpace			= [ \t\f]+
+CaracterDeEntrada	= [^\r\n]
+
+%%
+
+<YYINITIAL>{	
+	/* Tipos */
+
+	{Integer} 			{return symbol(sym.Integer, yytext());}
+	{Boolean} 			{return symbol(sym.Boolean, yytext());}
+	{Char}				{return symbol(sym.Char, yytext());}
+	{String}			{return symbol(sym.String, yytext());}
+	{Type}				{return symbol(sym.Type, yytext());}
+
+
+	/* Funciones */
+
+	{Sub}				{return symbol(sym.Sub, yytext());}
+	{Function}			{return symbol(sym.Function, yytext());}
+	{Exit}				{return symbol(sym.Exit, yytext());}
+	{Call}				{return symbol(sym.Call, yytext());}
+	{ByRef}				{return symbol(sym.ByRef, yytext());}
+	{ByVal}				{return symbol(sym.ByVal, yytext());}
+
+
+
+	/* Declaraciones */
+
+	{Dim}				{return symbol(sym.Dim, yytext());}
+	{As}				{return symbol(sym.As, yytext());}
+	{Public}			{return symbol(sym.Public, yytext());} 
+	{Private}			{return symbol(sym.Private, yytext());}
+
+
+	/* Asignacion y comparacion de igualdad */
+
+	{Igual}   			{return symbol(sym.Igual, yytext());}
+
+
+
+	/* operadores artimenticos */
+
+	{Mas} 				{return symbol(sym.Mas, yytext());}
+	{Menos} 			{return symbol(sym.Menos, yytext());}
+	{Por} 				{return symbol(sym.Por, yytext());}
+	{Entre} 			{return symbol(sym.Entre, yytext());}
+
+
+
+	/* Operadores logicos */
+
+	{Mayor} 			{return symbol(sym.Mayor, yytext());}
+	{MayorIgual} 		{return symbol(sym.MayorIgual, yytext());}
+	{Menor} 			{return symbol(sym.Menor, yytext());}
+	{MenorIgual} 		{return symbol(sym.MenorIgual, yytext());}
+	{And}				{return symbol(sym.And, yytext());}
+	{Or}				{return symbol(sym.Or, yytext());}
+	{Not}				{return symbol(sym.Not, yytext());}
+
+
+
+	/* Estrucutras de control de flujo */
+
+	{For}				{return symbol(sym.For, yytext());}
+	{To}				{return symbol(sym.To, yytext());}
+	{Step}				{return symbol(sym.Step, yytext());}
+	{Next}				{return symbol(sym.Next, yytext());}
+	{Loop}				{return symbol(sym.Loop, yytext());}
+	{Do}				{return symbol(sym.Do, yytext());}
+	{While}				{return symbol(sym.While, yytext());}
+	{Until}				{return symbol(sym.Until, yytext());}
+	{If}				{return symbol(sym.If, yytext());}
+	{Then}				{return symbol(sym.Then, yytext());}
+	{Else}				{return symbol(sym.Else, yytext());}
+	{ElseIf}			{return symbol(sym.ElseIf, yytext());}
+	{End}				{return symbol(sym.End, yytext());}
+
+
+
+	/* Literales */
+
+	{True}				{return symbol(sym.True, yytext());}
+	{False}				{return symbol(sym.False, yytext());}
+	{IntLiteral}		{return symbol(sym.IntLiteral, yytext());}
+
+
+
+	/* misc */
+
+	{Coma}				{return symbol(sym.Coma, yytext());}
+	{Punto}				{return symbol(sym.Punto, yytext());}
+	{ParI}				{return symbol(sym.ParI, yytext());}
+	{ParD}				{return symbol(sym.ParD, yytext());}
+	{GuionBajo}			{return symbol(sym.GuionBajo, yytext());}
+	{Ampersand}			{return symbol(sym.Ampersand, yytext());}
+
+	{Id}				{return symbol(sym.Id, yytext());}
+	{Comilla}			{yybegin(CADENA);}
+	{Apostrofe}			{yybegin(COMENTARIO);}
+	{FinDeLinea}		{return symbol(sym.FinDeLinea, yytext());}
+	{WhiteSpace}		{/* ignorar */}
+
+	.					{return symbol(sym.error, yytext());}
+}
+
+<CADENA>{
+	[\r|\n|\r\n]		{return symbol(sym.error, "runaway string");}
+	[^\r\n\"]			{strBuff.append(yytext());}
+	\"\"				{strBuff.append("\"");	/* asi se escapan las comillas en vb6 wtf */}
+	\"					{strBuff.setLength(0); yybegin(YYINITIAL); return symbol(sym.StrLiteral, strBuff);}
+}
+
+<COMENTARIO>{
+	[\r|\n|\r\n]		{yybegin(YYINITIAL);}
+	.					{/* que se venga lo que sea */}
+}

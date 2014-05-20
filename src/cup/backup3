@@ -1,0 +1,369 @@
+/* ----------------------Preliminary Declarations Section--------------------*/
+
+package parser;
+import java_cup.runtime.*;
+import java.util.*;
+import javax.swing.JOptionPane;
+import lexer.VbLexer;
+import parser.VbSyntaxError;
+import parser.sym;
+import org.fife.ui.rsyntaxtextarea.parser.Parser;
+import org.fife.ui.rsyntaxtextarea.parser.ExtendedHyperlinkListener;
+import org.fife.ui.rsyntaxtextarea.parser.ParseResult;
+import org.fife.ui.rsyntaxtextarea.parser.ParserNotice;
+
+scan with {:
+	Symbol symbol = null;
+	
+	while (symbol == null || symbol.sym == sym.error){
+		symbol = getScanner().next_token();
+		if (symbol.sym == sym.error){
+			MySymbol mySymbol = (MySymbol)symbol;
+			String msg = "Error en linea " + mySymbol.left; 
+			addErr(msg, mySymbol.left, mySymbol.right, mySymbol.offset, mySymbol.value.toString().length());
+			appendErr("Caracter invalido '" + mySymbol.value.toString() + "'");
+		}
+	}
+
+	return symbol != null ? symbol : getSymbolFactory().newSymbol("END_OF_FILE", EOF_sym());
+:}
+
+parser code {: 
+	private VbLexer lexer;
+	private ArrayList<VbSyntaxError> errLst = new ArrayList<>();
+	private boolean tieneMain = false;
+
+	public VbParser(VbLexer lex) {
+		super(lex);
+		this.lexer = lex;
+	}
+
+	public void user_init(){
+		this.tieneMain = false;
+		this.errLst = new ArrayList<>();
+	}
+	
+	public boolean tieneMain(){
+		return this.tieneMain;
+	}
+
+	public void setTieneMain(boolean valor){
+		this.tieneMain = valor;
+	}
+
+	public Symbol getCurToken(){
+		return this.cur_token;
+	}
+
+	public void report_fatal_error(String message, Object info) throws Exception{
+		done_parsing();
+		report_error(message, info);
+		throw new Exception("Can't recover from previous error(s)");
+	}
+
+	public void report_error(String message, Object info){
+		System.err.print(message);
+		System.err.flush();
+		if ((info instanceof Symbol)){
+		  if (((Symbol)info).left != -1){
+			System.err.println(" at character " + ((Symbol)info).left + " of input");
+		  }else{
+			System.err.println("");
+		  }
+		}else{
+		  System.err.println("");
+	   }
+	}
+
+	public void syntax_error(Symbol cur_token){
+		System.out.println("syntax_error");
+		try{
+			MySymbol my_cur_token = (MySymbol)cur_token;
+			String msg = "Error en linea " + my_cur_token.left + ", ";
+			
+			if (my_cur_token.value.toString().contains("\n") || my_cur_token.value.toString().contains("\r")){
+				msg += "columna " + my_cur_token.right;
+			}else{
+				msg += "token '" + my_cur_token.value.toString() + "'";
+			}
+
+			addErr(msg, my_cur_token.left, my_cur_token.right, my_cur_token.offset, cur_token.value.toString().length());
+		}catch(Exception ex){
+			
+			System.err.println("1cur_token '" + cur_token + "' no se pudo convertir a mysymbol: " + cur_token.toString() + ", left: " + cur_token.left + ", right: " + cur_token.right);
+		}
+	}
+
+	public void unrecovered_syntax_error(Symbol cur_token) throws Exception{
+		System.out.println("unrec_syntax_error");
+		try{
+			MySymbol my_cur_token = (MySymbol)cur_token;
+			String msg = "Error fatal en linea " + my_cur_token.left + ", ";
+			
+			if (my_cur_token.value.toString().contains("\n") || my_cur_token.value.toString().contains("\r")){
+				msg += "columna " + my_cur_token.right;
+			}else{
+				msg += "token '" + my_cur_token.value.toString() + "'";
+			}
+
+			addErr(msg, my_cur_token.left, my_cur_token.right, my_cur_token.offset, cur_token.value.toString().length());
+		}catch(Exception ex){
+			System.err.println("2unrec cur_token no se pudo convertir a mysymbol: " + cur_token.toString() + ", left: " + cur_token.left + ", right: " + cur_token.right);
+		}
+	}
+
+	protected int error_sync_size(){
+		return 3;
+	}
+	
+	public void addErr(String msg, int left, int right, int offset, int length){
+		this.errLst.add(new VbSyntaxError(msg, left, right, offset, length));
+	}
+
+	public void appendErr(String msg){
+		if (!this.errLst.isEmpty()){
+			int index = this.errLst.size() - 1;
+			this.errLst.get(index).message += ": " + msg;
+		}
+	}
+
+	public ArrayList getErrLst(){
+		return this.errLst;
+	}
+
+	public void setLexer(VbLexer lexer){
+		this.lexer = lexer;
+	}
+:};
+
+terminal			Dim,Mas,Menos,Por,Entre,Menor,Mayor,Not,And,Or,
+					For,To,Step,Next,Loop,Do,While,Until,If,Then,Else,ElseIf,End,Integer,
+					Boolean,Char,String,ByVal,ByRef,As,Sub,Function,
+					Write,Writeln,Coma,Punto,ParI,ParD,True,GuionBajo,Igual,Id,
+					CambioDeLinea,Concatenar,InicioDeLinea,NuevaLinea,MayorIgual,
+					MenorIgual,False,Call,Exit,Input,Type,Ampersand;
+
+terminal			Public,Private;
+//non terminal		AccessMod;
+
+terminal			IntLiteral, StrLiteral;
+
+terminal			FinDeLinea;
+
+non terminal		ProgStart, Root, RootStmts, RootStmt, RootDecl, VarDecl ,
+					Block, BlockStmts, BlockStmt, BlockDecl, IdLst,
+					FuncDecl, FuncBody, SubDecl, SubBody, ArgDecl, ArgLst, PassMech, Tipo;
+
+non terminal		MainDecl, MainHead, MainBody;
+
+non terminal		TypeDecl, TypeBlock, TypeBlockStmts, TypeVarDecl;
+
+non terminal		Asignable, Asignacion, Comparacion, Condicion, Expresion, Termino, Operador;
+
+non terminal		ForLoop, DoWhile, IfStmt;
+
+non terminal		Args, Params, ParamLst;
+
+non terminal		Distinto, BoolLiteral;
+
+non terminal		MethodCall, FuncEval, Property, PropChain, LineEnd;
+
+/* -------------Precedence and Associatively of Terminals Section----------- 
+precedence left MAS, MENOS;
+precedence left POR, DIV;
+precedence left IGUAL;
+*/
+
+precedence right Not;
+
+start with ProgStart;
+
+/*-----------------------------------------------------------------*/
+/* ----------------------------Grammar Section-------------------- */
+/*-----------------------------------------------------------------*/
+
+ProgStart				::= Root;
+
+
+
+/* ROOT */
+
+Root					::= RootStmts | LineEnd RootStmts;
+
+RootStmts				::= RootStmt
+						|	RootStmts RootStmt;
+
+RootStmt				::= RootDecl;
+
+RootDecl				::= VarDecl
+						|	SubDecl
+						|	FuncDecl
+						|	TypeDecl;
+
+VarDecl					::= Dim Id As Tipo LineEnd
+						|	Dim error LineEnd {: parser.appendErr("Se esperaba Id"); :}
+						|	Dim Id error LineEnd {: parser.appendErr("Se esperaba 'As'"); :}
+						|	Dim Id As error LineEnd {: parser.appendErr("Se esperaba Tipo"); :};
+
+SubDecl					::= Sub Id:id Params Block End Sub LineEnd
+						{:
+							if (id.toString().equalsIgnoreCase("Main")){
+								if (parser.tieneMain()){
+									MySymbol myId = (MySymbol)CUP$VbParser$stack.elementAt(CUP$VbParser$top-7);
+
+									parser.syntax_error(myId);
+									parser.appendErr("Sub Main ya fue declarado");
+								}else{
+									parser.setTieneMain(true);
+								}
+							}
+						:}
+						|   Sub error LineEnd {: parser.appendErr("Se esperaba Id"); :}
+						|	Sub Id error Block End Sub LineEnd {: parser.appendErr("Se esperaban parametros"); :}
+						|	Sub Id Params error {: parser.appendErr("algo"); :};
+
+
+FuncDecl				::= Function Id Params As Tipo Block End Function LineEnd
+						|	Function error {: parser.appendErr("Se esperaba Id"); :}
+						|	Function Id error {: parser.appendErr("Se esperaban parametros"); :}
+						|	Function Id Params error {: parser.appendErr("Se esperaba 'As'"); :}
+						|	Function Id Params As error {: parser.appendErr("Se esperaba Tipo"); :}
+						|	Function Id Params As Tipo error {: parser.appendErr("Se esperaba bloque"); :}
+						|	error {: parser.appendErr("Sentencia invalida"); :};
+
+TypeDecl				::= Type Id TypeBlock End Type LineEnd;
+
+TypeBlock				::= LineEnd TypeBlockStmts | LineEnd;
+
+TypeBlockStmts			::= TypeVarDecl
+						|	TypeBlockStmts TypeVarDecl;
+
+TypeVarDecl				::= Id As Tipo LineEnd;/*
+						|	Id error LineEnd {: parser.appendErr("Se esperaba 'As'"); :}
+						|	Id As error LineEnd {: parser.appendErr("Se esperaba Tipo"); :}
+						|	Id As Tipo error LineEnd {: parser.appendErr("Se esperaba fin de linea"); :}
+						|	error TypeVarDecl {: parser.appendErr("Sentencia invalida dentro de Type"); :};*/
+
+
+
+/* BLOCK */
+
+Block					::= LineEnd BlockStmts 
+						|	LineEnd;
+
+BlockStmts				::= BlockStmt
+						|	BlockStmts BlockStmt;
+
+BlockStmt				::= VarDecl
+						|	ForLoop
+						|	DoWhile
+						|	IfStmt
+						|	Asignacion
+						|	MethodCall;
+
+
+
+/* Asignacion, Comparacion, Expresiones etc */
+
+Asignable				::= Id | Property;
+
+Asignacion				::= Asignable Igual Expresion LineEnd;
+
+Comparacion				::= Expresion Igual Expresion;
+
+Condicion				::= Expresion
+						|	Comparacion;
+
+Expresion				::= Termino
+						|	Expresion Operador Termino
+						|	Expresion Operador GuionBajo LineEnd Termino;
+
+Termino					::= IntLiteral
+						|	BoolLiteral
+						|	StrLiteral
+						|	Id
+						|	FuncEval
+						|	Property
+						|	ParI Expresion ParD;
+
+Operador				::= Mas
+						|	Menos
+						|	Por
+						|	Entre
+						|	And
+						|	Or
+						|	Not
+						|	Menor
+						|	MenorIgual
+						|	Mayor
+						|	MayorIgual
+						|	Distinto
+						|	Ampersand;
+
+
+
+/* Estructuras */
+
+ForLoop					::= For Id Igual Expresion To Expresion Block Next Id LineEnd;
+
+DoWhile					::= Do While Condicion Block Loop LineEnd;
+
+IfStmt					::= If Condicion Then Block End If LineEnd;
+
+
+
+/* Tipos */
+
+Tipo					::= Integer
+						|	Boolean
+						|	String
+						|	Char
+						|	Id;
+
+/*AccessMod				::= Public
+						|	Private;*/
+
+
+
+/* Argumentos y Parametros */
+
+Args					::= Expresion
+						|	Args Coma Expresion
+						|	/* lambda */;
+
+Params					::= ParI ParD
+						|	ParI ParamLst ParD
+						|	ParI error ParD {: parser.appendErr("Parametros invalidos"); :}
+						|	ParI error {: parser.appendErr("Se esperaban parametros"); :};
+						
+
+ParamLst				::= PassMech Id As Tipo
+						|	ParamLst Coma PassMech Id As Tipo
+						|	ParamLst Coma error {: parser.appendErr("Se esperaba Parametro"); :}
+						|	PassMech error {: parser.appendErr("Se esperaba Id"); :}
+						|	PassMech Id error {: parser.appendErr("Se esperaba 'As'"); :}
+						|	PassMech Id As error {: parser.appendErr("Se esperaba Tipo"); :};
+
+PassMech				::= ByVal
+						|	ByRef;
+
+
+
+/* Cositas... */
+
+BoolLiteral				::= True
+						|	False;
+
+Distinto				::= Menor Mayor;
+
+MethodCall				::= FuncEval LineEnd
+						|	Call FuncEval LineEnd;
+
+FuncEval				::= Id ParI Args ParD;
+
+Property				::= Id PropChain;
+
+PropChain				::= Punto Id
+						|	Punto Id PropChain;
+
+LineEnd					::= FinDeLinea | LineEnd FinDeLinea;

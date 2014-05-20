@@ -1,0 +1,422 @@
+/* ----------------------Preliminary Declarations Section--------------------*/
+
+package parser;
+import java_cup.runtime.*;
+import java.util.*;
+import javax.swing.JOptionPane;
+import lexer.VbLexer;
+import parser.VbSyntaxError;
+import parser.sym;
+import symtable.*;
+import org.fife.ui.rsyntaxtextarea.parser.Parser;
+import org.fife.ui.rsyntaxtextarea.parser.ExtendedHyperlinkListener;
+import org.fife.ui.rsyntaxtextarea.parser.ParseResult;
+import org.fife.ui.rsyntaxtextarea.parser.ParserNotice;
+
+scan with {:
+	Symbol symbol = null;
+	System.out.println("scanwith code");
+	while (symbol == null || symbol.sym == sym.error){
+		symbol = getScanner().next_token();
+		if (symbol.sym == sym.error){
+			MyToken mySymbol = (MyToken)symbol;
+			String msg = "Error en linea " + mySymbol.left; 
+			addErr(msg, mySymbol.left, mySymbol.right, mySymbol.offset, mySymbol.value.toString().length());
+			if (mySymbol.value.toString().equalsIgnoreCase("runaway string")){
+				appendErr("Cadena no cerrada");
+			}else{
+				appendErr("Caracter invalido '" + mySymbol.value.toString() + "'");
+			}
+		}
+	}
+
+	return symbol != null ? symbol : getSymbolFactory().newSymbol("END_OF_FILE", EOF_sym());
+:}
+
+parser code {: 
+	private VbLexer lexer;
+	private ArrayList<VbSyntaxError> errLst = new ArrayList<>();
+	private boolean tieneMain = false;
+	private Scope curScope;
+
+	public VbParser(VbLexer lex) {
+		super(lex);
+		this.lexer = lex;
+	}
+
+	public void user_init(){
+		this.tieneMain = false;
+		this.errLst = new ArrayList<>();
+		this.curScope = SymTable.createRootScope();
+	}
+	
+	public boolean tieneMain(){
+		return this.tieneMain;
+	}
+
+	public void setTieneMain(boolean valor){
+		this.tieneMain = valor;
+	}
+
+	public Symbol getCurToken(){
+		return this.cur_token;
+	}
+
+	public Scope getCurScope(){
+		return this.curScope;
+	}
+
+	public void report_fatal_error(String message, Object info) throws Exception{
+		done_parsing();
+		report_error(message, info);
+		throw new Exception("Can't recover from previous error(s)");
+	}
+
+	public void report_error(String message, Object info){
+		System.err.print(message);
+		System.err.flush();
+		if ((info instanceof Symbol)){
+		  if (((Symbol)info).left != -1){
+			System.err.println(" at character " + ((Symbol)info).left + " of input");
+		  }else{
+			System.err.println("");
+		  }
+		}else{
+		  System.err.println("");
+	   }
+	}
+
+	public void syntax_error(Symbol cur_token){
+		System.out.println("syntax_error");
+		try{
+			MyToken my_cur_token = (MyToken)cur_token;
+			String msg = "Error en linea " + my_cur_token.left + ", ";
+			
+			if (my_cur_token.value.toString().contains("\n") || my_cur_token.value.toString().contains("\r")){
+				msg += "columna " + my_cur_token.right;
+			}else{
+				msg += "token '" + my_cur_token.value.toString() + "'";
+			}
+
+			addErr(msg, my_cur_token.left, my_cur_token.right, my_cur_token.offset, cur_token.value.toString().length());
+		}catch(Exception ex){
+			System.out.println("1cur_token '" + cur_token + "' no se pudo convertir a mysymbol: " + cur_token.toString() + ", left: " + cur_token.left + ", right: " + cur_token.right);
+		}
+	}
+
+	public void unrecovered_syntax_error(Symbol cur_token) throws Exception{
+		System.out.println("unrec_syntax_error");
+		try{
+			MyToken my_cur_token = (MyToken)cur_token;
+			String msg = "Error fatal en linea " + my_cur_token.left + ", ";
+			
+			if (my_cur_token.value.toString().contains("\n") || my_cur_token.value.toString().contains("\r")){
+				msg += "columna " + my_cur_token.right;
+			}else{
+				msg += "token '" + my_cur_token.value.toString() + "'";
+			}
+
+			addErr(msg, my_cur_token.left, my_cur_token.right, my_cur_token.offset, cur_token.value.toString().length());
+		}catch(Exception ex){
+			System.out.println("2unrec cur_token no se pudo convertir a mysymbol: " + cur_token.toString() + ", left: " + cur_token.left + ", right: " + cur_token.right);
+		}
+	}
+
+	protected int error_sync_size(){
+		return 3;
+	}
+	
+	public void addErr(String msg, int left, int right, int offset, int length){
+		this.errLst.add(new VbSyntaxError(msg, left, right, offset, length));
+	}
+
+	public void appendErr(String msg){
+		if (!this.errLst.isEmpty()){
+			int index = this.errLst.size() - 1;
+			this.errLst.get(index).message += ": " + msg;
+		}
+	}
+
+	public ArrayList getErrLst(){
+		return this.errLst;
+	}
+
+	public void setLexer(VbLexer lexer){
+		this.lexer = lexer;
+	}
+
+	public MyToken tokenAt(java.util.Stack stack, int top, int offset){
+		return (MyToken)stack.elementAt(top + offset);
+	}
+
+	public MyToken toMyToken(Object o){
+		return (MyToken)o;
+	}
+
+:};
+
+terminal			Dim,Mas,Menos,Por,Entre,Menor,Mayor,Not,And,Or,
+					For,To,Step,Next,Loop,Do,While,Until,If,Then,Else,ElseIf,End,Integer,
+					Boolean,Char,String,ByVal,ByRef,As,Sub,Function,
+					Write,Writeln,Coma,Punto,ParI,ParD,True,GuionBajo,Igual,Id,
+					CambioDeLinea,Concatenar,InicioDeLinea,NuevaLinea,MayorIgual,
+					MenorIgual,False,Call,Exit,Input,Type,Ampersand;
+
+terminal			Public,Private;
+//non terminal		AccessMod;
+
+terminal			IntLiteral, StrLiteral;
+
+terminal			FinDeLinea;
+
+non terminal		ProgStart, Root, RootStmts, RootStmt, RootDecl, VarDecl ,
+					Block, BlockStmts, BlockStmt, BlockDecl, IdLst,
+					FuncDecl, FuncBody, SubDecl, SubBody, ArgDecl, ArgLst, PassMech, Tipo;
+
+non terminal		MainDecl, MainHead, MainBody;
+
+non terminal		TypeDecl, TypeBlock, TypeBlockStmts, TypeVarDecl;
+
+non terminal		Asignable, Asignacion, Comparacion, Condicion, Expresion, Termino, Operador;
+
+non terminal		ForLoop, DoWhile, IfStmt;
+
+non terminal		Args, Params, ParamLst;
+
+non terminal		Distinto, BoolLiteral;
+
+non terminal		MethodCall, FuncEval, Property, PropChain, LineEnd;
+
+/* -------------Precedence and Associatively of Terminals Section----------- 
+precedence left MAS, MENOS;
+precedence left POR, DIV;
+precedence left IGUAL;
+*/
+
+precedence right Not;
+
+start with ProgStart;
+
+/*-----------------------------------------------------------------*/
+/* ----------------------------Grammar Section-------------------- */
+/*-----------------------------------------------------------------*/
+
+ProgStart				::= Root;
+
+
+
+/* ROOT */
+
+Root					::= RootStmts | LineEnd RootStmts;
+
+RootStmts				::= RootStmt
+						|	RootStmts RootStmt;
+
+RootStmt				::= RootDecl | error {: parser.appendErr("error"); :};
+
+RootDecl				::= VarDecl
+						|	SubDecl
+						|	FuncDecl
+						|	TypeDecl;
+
+VarDecl					::= Dim Id:id As Tipo:tipo LineEnd {: 
+								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-3);
+								parser.getCurScope().addVar(new Variable(myid.value.toString(), myid.left, myid.right, myid.offset, tipo.toString(), false));
+						:}
+						|	Dim error LineEnd {: parser.appendErr("Se esperaba Id"); :}
+						|	Dim Id error LineEnd {: parser.appendErr("Se esperaba 'As'"); :}
+						|	Dim Id As error LineEnd {: parser.appendErr("Se esperaba Tipo"); :};
+
+SubDecl					::= Sub Id:id Params Block End Sub LineEnd
+						{:
+							if (id.toString().equalsIgnoreCase("Main")){
+								if (parser.tieneMain()){
+									MyToken myId = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-5);
+
+									parser.syntax_error(myId);
+									parser.appendErr("Sub Main ya fue declarado");
+								}else{
+									parser.setTieneMain(true);
+								}
+							}
+						:}
+						|   Sub error {: parser.appendErr("Se esperaba Id"); :}
+						|	Sub Id error {: parser.appendErr("Se esperaban parametros"); :}
+						|	Sub Id Params error {: parser.appendErr("Se esperaba bloque"); :}
+						|	Sub Id Params Block error {: parser.appendErr("Se esperaba End Sub"); :}
+						|	Sub Id error Block End Sub LineEnd {: parser.appendErr("Se esperaban parametros"); :};
+
+
+FuncDecl				::= Function Id Params As Tipo Block End Function LineEnd
+						|   Function error {: parser.appendErr("Se esperaba Id"); :}
+						|	Function Id error {: parser.appendErr("Se esperaban parametros"); :}
+						|	Function Id Params error {: parser.appendErr("Se esperaba 'As'"); :}
+						|	Function Id Params As error {: parser.appendErr("Se esperaba Tipo"); :}
+						|	Function Id Params As Tipo Block error {: parser.appendErr("Se esperaba End Function"); :}
+						|	Function Id error Block End Sub LineEnd {: parser.appendErr("Se esperaban parametros"); :};
+
+TypeDecl				::= Type Id TypeBlock End Type LineEnd;
+
+TypeBlock				::= LineEnd TypeBlockStmts | LineEnd;
+
+TypeBlockStmts			::= TypeVarDecl
+						|	TypeBlockStmts TypeVarDecl;
+
+TypeVarDecl				::= Id As Tipo LineEnd;/*
+						|	Id error LineEnd {: parser.appendErr("Se esperaba 'As'"); :}
+						|	Id As error LineEnd {: parser.appendErr("Se esperaba Tipo"); :}
+						|	Id As Tipo error LineEnd {: parser.appendErr("Se esperaba fin de linea"); :}
+						|	error TypeVarDecl {: parser.appendErr("Sentencia invalida dentro de Type"); :};*/
+
+
+
+/* BLOCK */
+
+Block					::= LineEnd BlockStmts 
+						|	LineEnd;
+
+BlockStmts				::= BlockStmt
+						|	BlockStmts BlockStmt;
+
+BlockStmt				::= VarDecl
+						|	ForLoop
+						|	DoWhile
+						|	IfStmt
+						|	Asignacion
+						|	MethodCall;
+
+
+
+/* Asignacion, Comparacion, Expresiones etc */
+
+Asignable				::= Id | Property;
+
+Asignacion				::= Asignable Igual Expresion LineEnd
+						|	Asignable error LineEnd {: parser.appendErr("Se esperaba '='"); :}
+						|	Asignable Igual error LineEnd {: parser.appendErr("Se esperaba Expresion"); :};
+
+Comparacion				::= Expresion Igual Expresion;
+
+Condicion				::= Expresion
+						|	Comparacion;
+
+Expresion				::= Termino
+						|	Not Termino
+						|	Expresion Operador Termino
+						|	Expresion Operador GuionBajo LineEnd Termino;
+
+Termino					::= IntLiteral
+						|	BoolLiteral
+						|	StrLiteral
+						|	Id
+						|	FuncEval
+						|	Property
+						|	ParI Expresion ParD;
+
+Operador				::= Mas
+						|	Menos
+						|	Por
+						|	Entre
+						|	And
+						|	Or
+						|	Not
+						|	Menor
+						|	MenorIgual
+						|	Mayor
+						|	MayorIgual
+						|	Distinto
+						|	Ampersand;
+
+
+
+/* Estructuras */
+
+ForLoop					::= For Id Igual Expresion To Expresion Block Next Id LineEnd
+						|	For error LineEnd {: parser.appendErr("Se esperaba Id"); :}
+						|	For Id error LineEnd {: parser.appendErr("Se esperaba '='"); :}
+						|	For Id Igual error {: parser.appendErr("Se esperaba Expresion"); :}
+						|	For Id Igual Expresion error LineEnd {: parser.appendErr("Se esperaba 'To'"); :}
+						|	For Id Igual Expresion To error LineEnd {: parser.appendErr("Se esperaba expresion"); :}
+						|	For Id Igual Expresion To Expresion error LineEnd {: parser.appendErr("Se esperaba fin de linea"); :}
+						|	For Id Igual Expresion To Expresion Block error LineEnd {: parser.appendErr("Se esperaba Next Id"); :};
+
+DoWhile					::= Do While Condicion Block Loop LineEnd
+						|	Do error LineEnd {: parser.appendErr("Se esperaba 'While'"); :}
+						|	Do While error LineEnd {: parser.appendErr("Se esperaba Condicion"); :}
+						|	Do While Condicion error LineEnd{: parser.appendErr("Se esperaba fin de linea"); :}
+						|	Do While Condicion Block error LineEnd {: parser.appendErr("Se esperaba 'Loop'"); :};
+
+IfStmt					::= If Condicion Then Block End If LineEnd
+						|	If error LineEnd{: parser.appendErr("Se esperaba Condicion"); :}
+						|	If Condicion error LineEnd {: parser.appendErr("Se esperaba 'Then'"); :}
+						|	If Condicion Then error LineEnd {: parser.appendErr("Se esperaba fin de linea"); :}
+						|	If Condicion Then Block error LineEnd {: parser.appendErr("Se esperaba 'End If'"); :};
+
+
+
+/* Tipos */
+
+Tipo					::= Integer	{: RESULT = "integer"; :}
+						|	Boolean {: RESULT = "boolean"; :}
+						|	String {: RESULT = "string"; :}
+						|	Char {: RESULT = "char"; :}
+						|	Id:id {: RESULT = id; :};
+
+/*AccessMod				::= Public
+						|	Private;*/
+
+
+
+/* Argumentos y Parametros */
+
+Params					::= ParI ParD
+						|	ParI ParamLst ParD
+						|	ParI error ParD {: parser.appendErr("Parametros invalidos"); :}
+						|	ParI error {: parser.appendErr("Se esperaban parametros"); :};
+						
+
+ParamLst				::= PassMech Id As Tipo
+						|	ParamLst Coma PassMech Id As Tipo
+						|	ParamLst Coma error {: parser.appendErr("Se esperaba Parametro"); :}
+						|	PassMech error {: parser.appendErr("Se esperaba Id"); :}
+						|	PassMech Id error {: parser.appendErr("Se esperaba 'As'"); :}
+						|	PassMech Id As error {: parser.appendErr("Se esperaba Tipo"); :};
+
+PassMech				::= ByVal
+						|	ByRef;
+
+
+
+/* Cositas... */
+
+BoolLiteral				::= True
+						|	False;
+
+Distinto				::= Menor Mayor;
+
+MethodCall				::= FuncEval LineEnd
+						|	Call FuncEval LineEnd;
+
+FuncEval				::= Id Args;
+
+Args					::= ParI ParD
+						|	ParI ArgLst ParD
+						|	ParI ArgLst error {: parser.appendErr("Se esperaba ')'"); :}
+						|	ParI error ParD {: parser.appendErr("Argumentos invalidos"); :};
+
+ArgLst					::= Expresion
+						|	ArgLst Coma Expresion
+						|	ArgLst Coma error {: parser.appendErr("Se esperaba Argumento"); :};
+
+/*Args					::= Expresion
+						|	Args Coma Expresion
+						|	 lambda; ;*/
+
+
+
+Property				::= Id PropChain;
+
+PropChain				::= Punto Id
+						|	Punto Id PropChain;
+
+LineEnd					::= FinDeLinea | LineEnd FinDeLinea;
