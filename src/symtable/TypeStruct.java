@@ -25,7 +25,7 @@ public class TypeStruct extends Simbolo{
 		this.variables = variables;
 	}
 	
-	public boolean hasVar(String id){
+	public boolean hasProp(String id){
 		for (Variable v:this.variables){
 			if (v.id.equalsIgnoreCase(id)){
 				return true;
@@ -35,7 +35,7 @@ public class TypeStruct extends Simbolo{
 		return false;
 	}
 	
-	public Variable findVar(String id){
+	public Variable findProp(String id){
 		for (Variable v:this.variables){
 			if (v.id.equalsIgnoreCase(id)){
 				return v;
@@ -45,7 +45,7 @@ public class TypeStruct extends Simbolo{
 		return null;
 	}
 	
-	public void addVar(Variable var){
+	public void addProp(Variable var){
 		this.variables.add(var);
 	}
 }

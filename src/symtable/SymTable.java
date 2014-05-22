@@ -19,6 +19,7 @@ public final class SymTable {
 	public static Metodo curMethod;
 	public static Boolean existeMain;
 	public static Integer blockCounter;
+	public static Property curProp;
 	private static ArrayList<Scope> scopes = new ArrayList<>();
 	
 	private SymTable(){
@@ -30,6 +31,7 @@ public final class SymTable {
 		SymTable.curScope = rootScope;
 		SymTable.curTypeStruct = null;
 		SymTable.curMethod = null;
+		SymTable.curProp = null;
 		SymTable.existeMain = false;
 		SymTable.blockCounter = 1;
 	}
@@ -60,6 +62,10 @@ public final class SymTable {
 	
 	public static String blockName(){
 		return "Block " + SymTable.blockCounter++;
+	}
+	
+	public static boolean isPrimitive(String tipo){
+		return tipo.equalsIgnoreCase("integer") || tipo.equalsIgnoreCase("string") || tipo.equalsIgnoreCase("char") || tipo.equalsIgnoreCase("boolean");
 	}
 	
 	public static void print(){

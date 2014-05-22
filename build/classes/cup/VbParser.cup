@@ -161,7 +161,9 @@ non terminal		MainDecl, MainHead, MainBody;
 
 non terminal		TypeDecl, TypeBlock, TypeBlockStmts, TypeVarDecl;
 
-non terminal		Asignable, Asignacion, Comparacion, Condicion, Expresion, Termino, Operador;
+non terminal		Asignable Asignable;
+
+non terminal		Asignacion, Comparacion, Condicion, Expresion, Termino, Operador;
 
 non terminal		ForLoop, DoWhile, IfStmt, ElseStmts;
 
@@ -179,12 +181,11 @@ non terminal		Property, PropChain;
 
 non terminal		MyToken Tipo;
 
-/* -------------Precedence and Associatively of Terminals Section----------- 
-precedence left MAS, MENOS;
-precedence left POR, DIV;
-precedence left IGUAL;
-*/
-
+/* -------------Precedence and Associatively of Terminals Section----------- */
+precedence left Mas, Menos, Ampersand;
+precedence left Por, Entre;
+precedence left Menor, MenorIgual, Mayor, MayorIgual, Distinto;
+precedence left And, Or;
 precedence right Not;
 
 start with ProgStart;
@@ -236,6 +237,9 @@ SubDecl					::= Sub Id {:
 								if (SymTable.curScope.hasSub(myid.value.toString())){
 									parser.syntax_error(myid);
 									parser.appendErr("Sub \"" + myid.value.toString() + "\" ya existe");
+								}else if (SymTable.curScope.hasFunc(myid.value.toString())){
+									parser.syntax_error(myid);
+									parser.appendErr("Ya existe una funcion llamada \"" + myid.value.toString() + "\"");
 								}else{
 									if (myid.value.toString().equalsIgnoreCase("main")){
 										SymTable.existeMain = true;
@@ -257,6 +261,9 @@ FuncDecl				::= Function Id {:
 								if (SymTable.curScope.hasFunc(myid.value.toString())){
 									parser.syntax_error(myid);
 									parser.appendErr("Function \"" + myid.value.toString() + "\" ya existe");
+								}else if (SymTable.curScope.hasSub(myid.value.toString())){
+									parser.syntax_error(myid);
+									parser.appendErr("Ya existe un Sub llamado \"" + myid.value.toString() + "\"");
 								}
 								
 								Funcion newFunc = new Funcion(myid.value.toString(), myid.left, myid.right, myid.offset, "void");
@@ -293,16 +300,16 @@ TypeBlockStmts			::= TypeVarDecl
 TypeVarDecl				::= Id As Tipo:tipo LineEnd {:
 								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-3);
 
-								if (SymTable.curTypeStruct.hasVar(myid.value.toString())){
+								if (SymTable.curTypeStruct.hasProp(myid.value.toString())){
 									parser.syntax_error(myid);
 									parser.appendErr("La propiedad \"" + myid.value.toString() + "\" ya existe en este Type");
 								}else{
-									SymTable.curTypeStruct.addVar(new Variable(myid.value.toString(), myid.left, myid.right, myid.offset, tipo.value.toString()));
-								}
+									if (!SymTable.rootScope.hasType(tipo.value.toString())){
+										parser.syntax_error(tipo);
+										parser.appendErr("\"" + tipo.value.toString() + "\" no es un tipo valido");
+									}
 
-								if (!SymTable.rootScope.hasType(tipo.value.toString())){
-									parser.syntax_error(tipo);
-									parser.appendErr("\"" + tipo.value.toString() + "\" no es un tipo valido");
+									SymTable.curTypeStruct.addProp(new Variable(myid.value.toString(), myid.left, myid.right, myid.offset, tipo.value.toString()));
 								}
 						:};/*
 						|	Id error LineEnd {: parser.appendErr("Se esperaba 'As'"); :}
@@ -342,20 +349,27 @@ Asignable				::= Id {:
 									RESULT = new Asignable("variable", v.tipo);
 								}
 						:}
-						|	Property;
+						|	Property:property {: RESULT = new Asignable("property", property.toString()); :};
 
 
-Asignacion				::= Asignable Igual Expresion LineEnd;
+Asignacion				::= Asignable:a Igual Expresion:e LineEnd {: 
+								System.out.println(a.tipo + " y " + e.toString());
+								if (!a.tipo.equalsIgnoreCase(e.toString())){
+									MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
+									parser.addErr("Error general: ", tok.left,tok.right,tok.offset+2, 2);
+									parser.appendErr("Se esperaba " + a.tipo + ", se recibio " + e.toString());
+								}
+							:};
 
 Comparacion				::= Expresion Igual Expresion;
 
 Condicion				::= Expresion
 						|	Comparacion;
 
-Expresion				::= Termino
-						|	Not Termino
-						|	Expresion Operador Termino
-						|	Expresion Operador GuionBajo LineEnd Termino;
+Expresion				::= Termino	{: RESULT = "integer"; :}
+						|	Not Termino {: RESULT = "integer"; :}
+						|	Expresion Operador Termino {: RESULT = "integer"; :}
+						|	Expresion Operador GuionBajo LineEnd Termino {: RESULT = "integer"; :};
 
 Termino					::= IntLiteral
 						|	BoolLiteral
@@ -503,62 +517,85 @@ ArgLst					::= Expresion
 
 
 
-Property				::= Id:id PropChain:propChain;
+Property				::= Id {:
+								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+								Variable v = SymTable.curScope.findVar(myid.value.toString());
 
-/*
-
-{:
-		MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-		Variable v = SymTable.curScope.findVar(myid.value.toString());
-
-		if (v == null){
-			parser.syntax_error(myid);
-			parser.appendErr("La variable \"" + myid.value.toString + "\" no ha sido declarada");
-		}else{
-			switch(v.tipo){
-				case "integer":
-				case "string":
-				case "boolean":
-				case "char":
-					parser.syntax_error(myid);
-					parser.appendErr("La variable \"" + v.id + "\" no es un Type");
-					break;
-				default:
-					TypeStruct t = SymTable.curScope.findTypeStruct(v.tipo);
-
-					for (int i = 1; i < segments.length; i++){
-						Variable prop = t.findVar(segments[i]);
-
-						if (prop == null){
-							parser.syntax_error(myid);
-							parser.appendErr("El Type \"" + t.id + "\" no tiene una propiedad llamada \"" + segments[i] + "\"");
-							break;
-						}else{
-							if (prop.tipo.equals("integer") || prop.tipo.equals("string") || prop.tipo.equals("boolean") || prop.tipo.equals("char")){
-								if (i < segments.length - 1){
+								if (v == null){
 									parser.syntax_error(myid);
-									parser.appendErr("La propiedad \"" + prop.id + "\" del Type \"" + t.id + " es de tipo \"" + prop.tipo + "\" y no tiene propiedades");
-									break;
+									parser.appendErr("La variable \"" + myid.value.toString() + "\" no ha sido declarada");
+								}else{
+									if (!SymTable.isPrimitive(v.tipo)){
+										Property p = new Property(v.id, v.linea, v.columna, v.offset, v.tipo);
+										SymTable.curProp = p;
+									}else{
+										parser.syntax_error(myid);
+										parser.appendErr("La variable \"" + v.id + "\" no es un Type4");
+									}
 								}
-							}else{
-								t = SymTable.curScope.findTypeStruct(prop.tipo);
-							}
-						}
+						:} PropChain:propChain {: RESULT = propChain; :};
 
-						if (i == segments.length - 1){
-							RESULT = new Asignable("property", prop.tipo);
-						}
-					}
-			}
-		}
-:}
+PropChain				::= Punto Id {:
+								if (SymTable.curProp != null){
+									String tipoCurProp = SymTable.curProp.tipo;
+									TypeStruct t = SymTable.curScope.findTypeStruct(tipoCurProp);
 
-*/
-PropChain				::= Punto Id:id {:
-								RESULT = "." + id.toString();
+									if (t == null || SymTable.isPrimitive(tipoCurProp)){
+										MyToken myid = new MyToken(sym.Id, SymTable.curProp.linea, SymTable.curProp.columna, SymTable.curProp.offset);
+										//MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
+										parser.syntax_error(myid);
+										parser.appendErr("\"" + tipoCurProp + "\" no es un Type3");
+										SymTable.curProp = null;
+									}else{
+										MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+										Variable v = t.findProp(myid.value.toString());
+										if (v == null){
+											parser.syntax_error(myid);
+											parser.appendErr("Type \"" + t.id + "\" no tiene una propiedad llamada \"" + myid.value.toString() + "\"1");
+											SymTable.curProp = null;
+										}else{
+											RESULT = v.tipo;
+										}
+									}
+								}
 						:}
-						|	Punto Id:id PropChain:propChain {:
-								RESULT = "." + id.toString() + propChain;
-						:};
+						|	Punto Id {:
+								if (SymTable.curProp != null){
+									String tipoCurProp = SymTable.curProp.tipo;
+									TypeStruct t = SymTable.curScope.findTypeStruct(tipoCurProp);
+
+									if (t == null || SymTable.isPrimitive(tipoCurProp)){
+										MyToken myid = new MyToken(sym.Id, SymTable.curProp.linea, SymTable.curProp.columna, SymTable.curProp.offset);
+										//MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
+										parser.syntax_error(myid);
+										parser.appendErr("\"" + tipoCurProp + "\" no es un Type1");
+										SymTable.curProp = null;
+									}else{
+										MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+										Variable v = t.findProp(myid.value.toString());
+										if (v == null){
+											parser.syntax_error(myid);
+											parser.appendErr("Type \"" + t.id + "\" no tiene una propiedad llamada \"" + myid.value.toString() + "\"2");
+											SymTable.curProp = null;
+										}else{
+											if (!SymTable.isPrimitive(v.tipo)){
+												t = SymTable.curScope.findTypeStruct(v.tipo);
+
+												if (t == null || SymTable.isPrimitive(tipoCurProp)){
+													parser.syntax_error(myid);
+													parser.appendErr("\"" + myid.value.toString() + "\" no es un Type5");
+													SymTable.curProp = null;
+												}else{
+													SymTable.curProp = new Property(v.id, v.linea, v.columna, v.offset, v.tipo);
+												}
+											}else{
+												parser.syntax_error(myid);
+												parser.appendErr("\"" + myid.value.toString() + "\" no es un Type2");
+												SymTable.curProp = null;
+											}
+										}
+									}
+								}
+						:} PropChain:propChain {: RESULT = propChain; :};
 
 LineEnd					::= FinDeLinea | FinDeLinea LineEnd;
