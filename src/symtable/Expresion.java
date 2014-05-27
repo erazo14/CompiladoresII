@@ -10,11 +10,8 @@ package symtable;
  *
  * @author Armando
  */
-public class Asignable extends Simbolo{
-	public String varOrProp;
-	
-	public Asignable(String id, Integer linea, Integer columna, Integer offset, String tipo, String varOrProp) {
+public class Expresion extends Simbolo{
+	public Expresion(String id, Integer linea, Integer columna, Integer offset, String tipo) {
 		super(id, linea, columna, offset, tipo);
-		this.varOrProp = varOrProp;
 	}
 }

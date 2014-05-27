@@ -107,6 +107,20 @@ public class Scope {
 		}
 	}
 	
+	public Funcion findFunc(String id){
+		for (Funcion f:this.funciones){
+			if (f.id.equalsIgnoreCase(id)){
+				return f;
+			}
+		}
+		
+		if (this.padre == null){
+			return null;
+		}else{
+			return this.padre.findFunc(id);
+		}
+	}
+	
 	public void addFunc(Funcion func){
 		this.funciones.add(func);
 	}

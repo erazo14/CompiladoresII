@@ -233,7 +233,12 @@ CaracterDeEntrada	= [^\r\n]
 	[\r|\n|\r\n]		{return symbol(sym.error, "runaway string");}
 	[^\r\n\"]			{strBuff.append(yytext());}
 	\"\"				{strBuff.append("\"");	/* asi se escapan las comillas en vb6 wtf */}
-	\"					{strBuff.setLength(0); yybegin(YYINITIAL); return symbol(sym.StrLiteral, strBuff);}
+	\"					{
+							String temp = strBuff.toString();
+							strBuff.setLength(0); 
+							yybegin(YYINITIAL); 
+							return symbol(sym.StrLiteral, temp)
+						;}
 }
 
 <COMENTARIO>{

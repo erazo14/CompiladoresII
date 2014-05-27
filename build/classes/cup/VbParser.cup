@@ -147,15 +147,18 @@ terminal			Dim,Mas,Menos,Por,Entre,Menor,Mayor,Not,And,Or,
 					MenorIgual,False,Call,Exit,Input,Type,Ampersand;
 
 terminal			Public,Private;
-//non terminal		AccessMod;
-
-terminal			IntLiteral, StrLiteral;
 
 terminal			FinDeLinea;
 
+terminal			IntLiteral, StrLiteral;
+
+
+
+non terminal		Literal BoolLiteral;
+
 non terminal		ProgStart, Root, RootStmts, RootStmt, RootDecl, VarDecl ,
 					Block, BlockStmts, BlockStmt, BlockDecl, IdLst,
-					FuncDecl, FuncBody, SubDecl, SubBody, ArgDecl, ArgLst;
+					FuncDecl, FuncBody, SubDecl, SubBody;
 
 non terminal		MainDecl, MainHead, MainBody;
 
@@ -163,30 +166,38 @@ non terminal		TypeDecl, TypeBlock, TypeBlockStmts, TypeVarDecl;
 
 non terminal		Asignable Asignable;
 
-non terminal		Asignacion, Comparacion, Condicion, Expresion, Termino, Operador;
+non terminal		Termino Termino, FuncEval;
+
+non terminal		Asignacion, Operador;
+
+non terminal		Expresion Expresion;
 
 non terminal		ForLoop, DoWhile, IfStmt, ElseStmts;
 
-non terminal		Args;
-
 non terminal		PassMech;
+
+non terminal		ArrayList<Expresion> Args, ArgLst;
 
 non terminal		ArrayList<Parametro> Params, ParamLst;
 
-non terminal		Distinto, BoolLiteral;
+non terminal		Distinto;	
 
-non terminal		MethodCall, FuncEval, LineEnd;
+non terminal		Negativo;
 
-non terminal		Property, PropChain;
+non terminal		MethodCall, LineEnd;
+
+non terminal		Termino Property;
+
+non terminal		PropChain;
 
 non terminal		MyToken Tipo;
 
 /* -------------Precedence and Associatively of Terminals Section----------- */
+precedence left And, Or;
+precedence left Menor, MenorIgual, Mayor, MayorIgual, Igual, Distinto;
 precedence left Mas, Menos, Ampersand;
 precedence left Por, Entre;
-precedence left Menor, MenorIgual, Mayor, MayorIgual, Distinto;
-precedence left And, Or;
-precedence right Not;
+precedence right Not, Negativo;
 
 start with ProgStart;
 
@@ -336,7 +347,7 @@ BlockStmt				::= VarDecl
 
 
 
-/* Asignacion, Comparacion, Expresiones etc */
+/* Asignacion, Expresiones etc */
 
 Asignable				::= Id {:
 								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
@@ -346,38 +357,275 @@ Asignable				::= Id {:
 									parser.syntax_error(myid);
 									parser.appendErr("La variable \"" + myid.value.toString() + "\" no ha sido declarada");
 								}else{
-									RESULT = new Asignable("variable", v.tipo);
+									RESULT = new Asignable(v.id, v.linea, v.columna, v.offset, v.tipo, "variable");
 								}
 						:}
-						|	Property:property {: RESULT = new Asignable("property", property.toString()); :};
-
-
-Asignacion				::= Asignable:a Igual Expresion:e LineEnd {: 
-								System.out.println(a.tipo + " y " + e.toString());
-								if (!a.tipo.equalsIgnoreCase(e.toString())){
-									MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
-									parser.addErr("Error general: ", tok.left,tok.right,tok.offset+2, 2);
-									parser.appendErr("Se esperaba " + a.tipo + ", se recibio " + e.toString());
+						|	Property:property {:
+								if (property == null){
+									RESULT = null;
+								}else{
+									RESULT = new Asignable(property.id, property.linea, property.columna, property.offset, property.tipo, "propiedad");
 								}
-							:};
+						:};
 
-Comparacion				::= Expresion Igual Expresion;
 
-Condicion				::= Expresion
-						|	Comparacion;
+Asignacion				::= Asignable:a Igual Expresion:e LineEnd {:
+								if (a != null && e != null){
+									if (!a.tipo.equalsIgnoreCase(e.tipo)){
+										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
+										parser.syntax_error(tok);
+										parser.appendErr("Asignacion ilegal (" + a.tipo + " = " + e.tipo + ")");
+									}
+								}
+						:};
 
-Expresion				::= Termino	{: RESULT = "integer"; :}
-						|	Not Termino {: RESULT = "integer"; :}
-						|	Expresion Operador Termino {: RESULT = "integer"; :}
-						|	Expresion Operador GuionBajo LineEnd Termino {: RESULT = "integer"; :};
+/*Comparacion				::= Expresion Igual Expresion;*/
 
-Termino					::= IntLiteral
-						|	BoolLiteral
-						|	StrLiteral
-						|	Id
-						|	FuncEval
-						|	Property
-						|	ParI Expresion ParD;
+/*Condicion				::= Expresion
+						|	Comparacion;*/
+
+Expresion				::= Expresion:e1 Mas Expresion:e2 {:
+								if (e1 != null && e2 != null){
+									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
+										RESULT = new Expresion("", 0, 0, 0, "integer");
+									}else{
+										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+										parser.syntax_error(tok);
+										parser.appendErr("Operacion ilegal (" + e1.tipo + " + " + e2.tipo + ")");
+										RESULT = null;
+									}
+								}else{
+									RESULT = null;
+								}
+						:}
+						|   Expresion:e1 Menos Expresion:e2 {:
+								if (e1 != null && e2 != null){
+									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
+										RESULT = new Expresion("", 0, 0, 0, "integer");
+									}else{
+										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+										parser.syntax_error(tok);
+										parser.appendErr("Operacion ilegal (" + e1.tipo + " - " + e2.tipo + ")");
+										RESULT = null;
+									}
+								}else{
+									RESULT = null;
+								}
+						:}
+						|   Expresion:e1 Ampersand Expresion:e2 {:
+								if (e1 != null && e2 != null){
+									if (SymTable.isPrimitive(e1.tipo) && SymTable.isPrimitive(e2.tipo)){
+										RESULT = new Expresion("", 0, 0, 0, "string");
+									}else{
+										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+										parser.syntax_error(tok);
+										parser.appendErr("Operacion ilegal (" + e1.tipo + " & " + e2.tipo + ")");
+										RESULT = null;
+									}
+								}
+						:}
+						|   Expresion:e1 Por Expresion:e2 {:
+								if (e1 != null && e2 != null){
+									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
+										RESULT = new Expresion("", 0, 0, 0, "integer");
+									}else{
+										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+										parser.syntax_error(tok);
+										parser.appendErr("Operacion ilegal (" + e1.tipo + " * " + e2.tipo + ")");
+										RESULT = null;
+									}
+								}
+						:}
+						|   Expresion:e1 Entre Expresion:e2 {:
+								if (e1 != null && e2 != null){
+									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
+										RESULT = new Expresion("", 0, 0, 0, "integer");
+									}else{
+										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+										parser.syntax_error(tok);
+										parser.appendErr("Operacion ilegal (" + e1.tipo + " / " + e2.tipo + ")");
+										RESULT = null;
+									}
+								}
+						:}
+						|   Expresion:e1 Menor Expresion:e2 {:
+								if (e1 != null && e2 != null){
+									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
+										RESULT = new Expresion("", 0, 0, 0, "boolean");
+									}else{
+										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+										parser.syntax_error(tok);
+										parser.appendErr("Operacion ilegal (" + e1.tipo + " < " + e2.tipo + ")");
+										RESULT = null;
+									}
+								}
+						:}
+						|   Expresion:e1 MenorIgual Expresion:e2 {:
+								if (e1 != null && e2 != null){
+									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
+										RESULT = new Expresion("", 0, 0, 0, "boolean");
+									}else{
+										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+										parser.syntax_error(tok);
+										parser.appendErr("Operacion ilegal (" + e1.tipo + " <= " + e2.tipo + ")");
+										RESULT = null;
+									}
+								}
+						:}
+						|   Expresion:e1 Mayor Expresion:e2 {:
+								if (e1 != null && e2 != null){
+									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
+										RESULT = new Expresion("", 0, 0, 0, "boolean");
+									}else{
+										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+										parser.syntax_error(tok);
+										parser.appendErr("Operacion ilegal (" + e1.tipo + " > " + e2.tipo + ")");
+										RESULT = null;
+									}
+								}
+						:}
+						|   Expresion:e1 MayorIgual Expresion:e2 {:
+								if (e1 != null && e2 != null){
+									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
+										RESULT = new Expresion("", 0, 0, 0, "boolean");
+									}else{
+										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+										parser.syntax_error(tok);
+										parser.appendErr("Operacion ilegal (" + e1.tipo + " >= " + e2.tipo + ")");
+										RESULT = null;
+									}
+								}
+						:}
+						|	Expresion:e1 Igual Expresion:e2 {:
+								if (e1 != null && e2 != null){
+									if (e1.tipo.equalsIgnoreCase(e2.tipo)){
+										RESULT = new Expresion("", 0, 0, 0, "boolean");
+									}else{
+										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+										parser.syntax_error(tok);
+										parser.appendErr("Operacion ilegal (" + e1.tipo + " = " + e2.tipo + ")");
+										RESULT = null;
+									}
+								}
+						:}
+						|   Expresion:e1 Distinto Expresion:e2 {:
+								if (e1 != null && e2 != null){
+									if (e1.tipo.equalsIgnoreCase(e2.tipo)){
+										RESULT = new Expresion("", 0, 0, 0, "boolean");
+									}else{
+										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+										parser.syntax_error(tok);
+										parser.appendErr("Operacion ilegal (" + e1.tipo + " <> " + e2.tipo + ")");
+										RESULT = null;
+									}
+								}
+						:}
+						|   Expresion:e1 And Expresion:e2 {:
+								if (e1 != null && e2 != null){
+									if (e1.tipo.equalsIgnoreCase("boolean") && e1.tipo.equalsIgnoreCase(e2.tipo)){
+										RESULT = new Expresion("", 0, 0, 0, "boolean");
+									}else{
+										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+										parser.syntax_error(tok);
+										parser.appendErr("Operacion ilegal (" + e1.tipo + " And " + e2.tipo + ")");
+										RESULT = null;
+									}
+								}
+						:}
+						|   Expresion:e1 Or Expresion:e2 {:
+								if (e1 != null && e2 != null){
+									if (e1.tipo.equalsIgnoreCase("boolean") && e1.tipo.equalsIgnoreCase(e2.tipo)){
+										RESULT = new Expresion("", 0, 0, 0, "boolean");
+									}else{
+										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+										parser.syntax_error(tok);
+										parser.appendErr("Operacion ilegal (" + e1.tipo + " Or " + e2.tipo + ")");
+										RESULT = null;
+									}
+								}
+						:}
+						|	Expresion:e1 Ampersand GuionBajo LineEnd Expresion:e2 {:
+								if (e1 != null && e2 != null){
+									if (SymTable.isPrimitive(e1.tipo) && SymTable.isPrimitive(e2.tipo)){
+										RESULT = new Expresion("", 0, 0, 0, "string");
+									}else{
+										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+										parser.syntax_error(tok);
+										parser.appendErr("Operacion ilegal (" + e1.tipo + " & " + e2.tipo + ")");
+										RESULT = null;
+									}
+								}
+						:}
+						|	ParI Expresion:e ParD {:
+								RESULT = e;
+						:}
+						|   Termino:t {:
+								if (t != null){
+									RESULT = new Expresion(t.id, t.linea, t.columna, t.offset, t.tipo);
+								}else{
+									RESULT = null;
+								}
+						:}
+						|	Not Expresion:e {:
+								if (e != null){
+									RESULT = new Expresion(e.id, e.linea, e.columna, e.offset, "boolean");
+								}else{
+									RESULT = null;
+								}
+						:}
+						|	Negativo Expresion:e {:
+								if (e != null){
+									if (e.tipo.equalsIgnoreCase("integer")){
+										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+										parser.syntax_error(tok);
+										parser.appendErr("Operacion ilegal ()");
+									}
+								}
+						:};
+
+Termino					::= IntLiteral {:  
+								MyToken intLit = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+								RESULT = new Termino(intLit.value.toString(), intLit.left, intLit.right, intLit.offset, "integer");
+						:}
+						|	BoolLiteral:b {:
+								RESULT = new Termino(b.id, b.linea, b.columna, b.offset, "boolean");
+						:}
+						|	StrLiteral:strLit {:
+								MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+								String valor = strLit.toString();
+
+								if (valor.length() == 1){
+									RESULT = new Termino(valor, tok.left, tok.right, tok.offset, "char");
+								}else{
+									RESULT = new Termino(valor, tok.left, tok.right, tok.offset, "string");
+								}
+						:}
+						|	Id {:
+								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+								Variable v = SymTable.curScope.findVar(myid.value.toString());
+
+								if (v == null){
+									parser.syntax_error(myid);
+									parser.appendErr("La variable \"" + myid.value.toString() + "\" no ha sido declarada");
+									RESULT = null;
+								}else{
+									RESULT = new Termino(v.id, v.linea, v.columna, v.offset, v.tipo);
+								}
+						:}
+						|	FuncEval:f {:
+								if (f == null){
+									RESULT = null;
+								}else{
+									RESULT = new Termino(f.id, f.linea, f.columna, f.offset, f.tipo);
+								}
+						:}
+						|	Property:p {:
+								if (p == null){
+									RESULT = null;
+								}else{
+									RESULT = new Termino(p.id, p.linea, p.columna, p.offset, p.tipo);
+								}
+						:};
 
 Operador				::= Mas
 						|	Menos
@@ -404,21 +652,21 @@ ForLoop					::= For Id Igual Expresion To Expresion {:
 								SymTable.endScope();
 						:} Next Id LineEnd;
 
-DoWhile					::= Do While Condicion {:
+DoWhile					::= Do While Expresion {:
 								MyToken doTok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
 								SymTable.createSubScope("Do" + SymTable.blockName(), doTok.left, doTok.right, doTok.offset); 	
 						:} Block {:
 								SymTable.endScope();
 						:} Loop LineEnd;
 
-IfStmt					::= If Condicion Then {:
+IfStmt					::= If Expresion Then {:
 								MyToken ifTok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
 								SymTable.createSubScope("If" + SymTable.blockName(), ifTok.left, ifTok.right, ifTok.offset); 
 						:} Block {: 
 								SymTable.endScope();
 						:} ElseStmts End If LineEnd;
 
-ElseStmts				::= ElseIf Condicion Then {: 
+ElseStmts				::= ElseIf Expresion Then {: 
 								MyToken myelif = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
 								SymTable.createSubScope("ElseIf" + SymTable.blockName(), myelif.left, myelif.right, myelif.offset); 
 						:} Block {: 
@@ -492,24 +740,69 @@ PassMech				::= ByVal:byVal {: RESULT = byVal.toString().toLowerCase(); :}
 
 /* Cositas... */
 
-BoolLiteral				::= True
-						|	False;
+BoolLiteral				::= True {:
+								MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+								RESULT = new Literal("true", tok.left, tok.right, tok.offset, "boolean");
+						:}
+						|	False {:
+								MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+								RESULT = new Literal("false", tok.left, tok.right, tok.offset, "boolean");
+						:};
 
 Distinto				::= Menor Mayor;
+
+Negativo				::= Menos;
 
 MethodCall				::= FuncEval LineEnd
 						|	Call FuncEval LineEnd;
 
-FuncEval				::= Id Args;
+FuncEval				::= Id Args:args {:
+								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+								Funcion f = SymTable.curScope.findFunc(myid.value.toString());
 
-Args					::= ParI ParD
-						|	ParI ArgLst ParD
+								if (f == null){
+									parser.syntax_error(myid);
+									parser.appendErr("La funcion \"" + myid.value.toString() + "\" no ha sido declarada");
+									RESULT = null;
+								}else{
+									if (f.parametros.size() != args.size()){
+										parser.syntax_error(myid);
+										parser.appendErr("La funcion \"" + myid.value.toString() + "\" recibe " + f.parametros.size() + " argumentos. Se pasaron " + args.size());
+										RESULT = null;
+									}else{
+										for (int i = 0; i < f.parametros.size(); i++){
+											if (!f.parametros.get(i).tipo.equalsIgnoreCase(args.get(i).tipo)){
+												parser.syntax_error(myid);
+												parser.appendErr("El argumento en la posicion " + (i + 1) + " es \"" + args.get(i).tipo + "\", debe ser \"" + f.parametros.get(i).tipo);
+											}
+										}
+									}
+									RESULT = new Termino(myid.value.toString(), myid.left, myid.right, myid.offset, f.tipo);
+								}
+						:};
+
+Args					::= ParI ParD {:
+								RESULT = new ArrayList<Expresion>();
+						:}
+						|	ParI ArgLst:argLst ParD {:
+								RESULT = argLst;
+						:}
 						|	ParI ArgLst error {: parser.appendErr("Se esperaba ')'"); :}
 						|	ParI error ParD {: parser.appendErr("Argumentos invalidos"); :};
 
-ArgLst					::= Expresion
-						|	ArgLst Coma Expresion
-						|	ArgLst Coma error {: parser.appendErr("Se esperaba Argumento"); :};
+ArgLst					::= Expresion:e {: 
+								ArrayList<Expresion> args = new ArrayList<>();
+								args.add(e);
+								RESULT = args;
+						:}
+						|	ArgLst:argLst Coma Expresion:e {: 
+								argLst.add(e);
+								RESULT = argLst;
+						:}
+						|	ArgLst:argLst Coma error {: 
+								parser.appendErr("Se esperaba Argumento"); 
+								RESULT = argLst;
+						:};
 
 /*Args					::= Expresion
 						|	Args Coma Expresion
@@ -531,9 +824,13 @@ Property				::= Id {:
 									}else{
 										parser.syntax_error(myid);
 										parser.appendErr("La variable \"" + v.id + "\" no es un Type4");
+										RESULT = null;
 									}
 								}
-						:} PropChain:propChain {: RESULT = propChain; :};
+						:} PropChain:propChain {: 
+								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+								RESULT = new Termino(myid.value.toString(), myid.left, myid.right, myid.offset, propChain.toString());
+						:};
 
 PropChain				::= Punto Id {:
 								if (SymTable.curProp != null){
@@ -542,7 +839,6 @@ PropChain				::= Punto Id {:
 
 									if (t == null || SymTable.isPrimitive(tipoCurProp)){
 										MyToken myid = new MyToken(sym.Id, SymTable.curProp.linea, SymTable.curProp.columna, SymTable.curProp.offset);
-										//MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
 										parser.syntax_error(myid);
 										parser.appendErr("\"" + tipoCurProp + "\" no es un Type3");
 										SymTable.curProp = null;
@@ -566,7 +862,6 @@ PropChain				::= Punto Id {:
 
 									if (t == null || SymTable.isPrimitive(tipoCurProp)){
 										MyToken myid = new MyToken(sym.Id, SymTable.curProp.linea, SymTable.curProp.columna, SymTable.curProp.offset);
-										//MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
 										parser.syntax_error(myid);
 										parser.appendErr("\"" + tipoCurProp + "\" no es un Type1");
 										SymTable.curProp = null;

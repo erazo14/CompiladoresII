@@ -180,9 +180,7 @@ non terminal		ArrayList<Expresion> Args, ArgLst;
 
 non terminal		ArrayList<Parametro> Params, ParamLst;
 
-non terminal		Distinto;	
-
-non terminal		Negativo;
+non terminal		Distinto;
 
 non terminal		MethodCall, LineEnd;
 
@@ -193,11 +191,11 @@ non terminal		PropChain;
 non terminal		MyToken Tipo;
 
 /* -------------Precedence and Associatively of Terminals Section----------- */
-precedence left And, Or;
-precedence left Menor, MenorIgual, Mayor, MayorIgual, Igual, Distinto;
 precedence left Mas, Menos, Ampersand;
 precedence left Por, Entre;
-precedence right Not, Negativo;
+precedence left Menor, MenorIgual, Mayor, MayorIgual, Distinto;
+precedence left And, Or;
+precedence right Not;
 
 start with ProgStart;
 
@@ -372,9 +370,12 @@ Asignable				::= Id {:
 Asignacion				::= Asignable:a Igual Expresion:e LineEnd {:
 								if (a != null && e != null){
 									if (!a.tipo.equalsIgnoreCase(e.tipo)){
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
-										parser.syntax_error(tok);
-										parser.appendErr("Asignacion ilegal (" + a.tipo + " = " + e.tipo + ")");
+										parser.addErr("Error en linea " + e.linea + ", columna " + e.columna + ": Se esperaba \"" + a.tipo + "\", se recibio \"" + e.tipo + "\"", e.linea, e.columna, e.offset, 0);
+										MyToken exp = new MyToken(sym.Id, e.linea, e.columna, e.offset);
+										//MyToken exp = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+										
+										//parser.syntax_error(exp);
+										//parser.appendErr("Se esperaba \"" + a.tipo + "\", se recibio \"" + e.tipo);
 									}
 								}
 						:};
@@ -384,202 +385,62 @@ Asignacion				::= Asignable:a Igual Expresion:e LineEnd {:
 /*Condicion				::= Expresion
 						|	Comparacion;*/
 
-Expresion				::= Expresion:e1 Mas Expresion:e2 {:
-								if (e1 != null && e2 != null){
-									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
-										RESULT = new Expresion("", 0, 0, 0, "integer");
-									}else{
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal (" + e1.tipo + " + " + e2.tipo + ")");
-										RESULT = null;
-									}
-								}else{
+Expresion				::= Termino:t {:
+								if (t == null){
 									RESULT = null;
-								}
-						:}
-						|   Expresion:e1 Menos Expresion:e2 {:
-								if (e1 != null && e2 != null){
-									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
-										RESULT = new Expresion("", 0, 0, 0, "integer");
-									}else{
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal (" + e1.tipo + " - " + e2.tipo + ")");
-										RESULT = null;
-									}
 								}else{
-									RESULT = null;
-								}
-						:}
-						|   Expresion:e1 Ampersand Expresion:e2 {:
-								if (e1 != null && e2 != null){
-									if (SymTable.isPrimitive(e1.tipo) && SymTable.isPrimitive(e2.tipo)){
-										RESULT = new Expresion("", 0, 0, 0, "string");
-									}else{
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal (" + e1.tipo + " & " + e2.tipo + ")");
-										RESULT = null;
-									}
-								}
-						:}
-						|   Expresion:e1 Por Expresion:e2 {:
-								if (e1 != null && e2 != null){
-									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
-										RESULT = new Expresion("", 0, 0, 0, "integer");
-									}else{
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal (" + e1.tipo + " * " + e2.tipo + ")");
-										RESULT = null;
-									}
-								}
-						:}
-						|   Expresion:e1 Entre Expresion:e2 {:
-								if (e1 != null && e2 != null){
-									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
-										RESULT = new Expresion("", 0, 0, 0, "integer");
-									}else{
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal (" + e1.tipo + " / " + e2.tipo + ")");
-										RESULT = null;
-									}
-								}
-						:}
-						|   Expresion:e1 Menor Expresion:e2 {:
-								if (e1 != null && e2 != null){
-									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
-										RESULT = new Expresion("", 0, 0, 0, "boolean");
-									}else{
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal (" + e1.tipo + " < " + e2.tipo + ")");
-										RESULT = null;
-									}
-								}
-						:}
-						|   Expresion:e1 MenorIgual Expresion:e2 {:
-								if (e1 != null && e2 != null){
-									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
-										RESULT = new Expresion("", 0, 0, 0, "boolean");
-									}else{
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal (" + e1.tipo + " <= " + e2.tipo + ")");
-										RESULT = null;
-									}
-								}
-						:}
-						|   Expresion:e1 Mayor Expresion:e2 {:
-								if (e1 != null && e2 != null){
-									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
-										RESULT = new Expresion("", 0, 0, 0, "boolean");
-									}else{
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal (" + e1.tipo + " > " + e2.tipo + ")");
-										RESULT = null;
-									}
-								}
-						:}
-						|   Expresion:e1 MayorIgual Expresion:e2 {:
-								if (e1 != null && e2 != null){
-									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
-										RESULT = new Expresion("", 0, 0, 0, "boolean");
-									}else{
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal (" + e1.tipo + " >= " + e2.tipo + ")");
-										RESULT = null;
-									}
-								}
-						:}
-						|	Expresion:e1 Igual Expresion:e2 {:
-								if (e1 != null && e2 != null){
-									if (e1.tipo.equalsIgnoreCase(e2.tipo)){
-										RESULT = new Expresion("", 0, 0, 0, "boolean");
-									}else{
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal (" + e1.tipo + " = " + e2.tipo + ")");
-										RESULT = null;
-									}
-								}
-						:}
-						|   Expresion:e1 Distinto Expresion:e2 {:
-								if (e1 != null && e2 != null){
-									if (e1.tipo.equalsIgnoreCase(e2.tipo)){
-										RESULT = new Expresion("", 0, 0, 0, "boolean");
-									}else{
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal (" + e1.tipo + " <> " + e2.tipo + ")");
-										RESULT = null;
-									}
-								}
-						:}
-						|   Expresion:e1 And Expresion:e2 {:
-								if (e1 != null && e2 != null){
-									if (e1.tipo.equalsIgnoreCase("boolean") && e1.tipo.equalsIgnoreCase(e2.tipo)){
-										RESULT = new Expresion("", 0, 0, 0, "boolean");
-									}else{
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal (" + e1.tipo + " And " + e2.tipo + ")");
-										RESULT = null;
-									}
-								}
-						:}
-						|   Expresion:e1 Or Expresion:e2 {:
-								if (e1 != null && e2 != null){
-									if (e1.tipo.equalsIgnoreCase("boolean") && e1.tipo.equalsIgnoreCase(e2.tipo)){
-										RESULT = new Expresion("", 0, 0, 0, "boolean");
-									}else{
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal (" + e1.tipo + " Or " + e2.tipo + ")");
-										RESULT = null;
-									}
-								}
-						:}
-						|	Expresion:e1 Ampersand GuionBajo LineEnd Expresion:e2 {:
-								if (e1 != null && e2 != null){
-									if (SymTable.isPrimitive(e1.tipo) && SymTable.isPrimitive(e2.tipo)){
-										RESULT = new Expresion("", 0, 0, 0, "string");
-									}else{
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal (" + e1.tipo + " & " + e2.tipo + ")");
-										RESULT = null;
-									}
-								}
-						:}
-						|	ParI Expresion:e ParD {:
-								RESULT = e;
-						:}
-						|   Termino:t {:
-								if (t != null){
 									RESULT = new Expresion(t.id, t.linea, t.columna, t.offset, t.tipo);
-								}else{
-									RESULT = null;
 								}
 						:}
-						|	Not Expresion:e {:
-								if (e != null){
-									RESULT = new Expresion(e.id, e.linea, e.columna, e.offset, "boolean");
-								}else{
+						|	Not Termino:t {:
+								if (t == null){
 									RESULT = null;
+								}else{
+									RESULT = new Expresion(t.id, t.linea, t.columna, t.offset, "boolean");
 								}
 						:}
-						|	Negativo Expresion:e {:
-								if (e != null){
-									if (e.tipo.equalsIgnoreCase("integer")){
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal ()");
+						|	/*Expresion:e Operador:o Termino:t {:
+								if (t == null){
+									RESULT = null;
+								}else{
+									String op = o.toString();
+									System.out.println("calculando " + e.id + " " + op + " " + t.id);
+									if (op.equals("*")){
+										RESULT = new Expresion(e.id, e.linea, e.columna, e.offset, "integer");
+									}else{
+										RESULT = new Expresion(e.id, e.linea, e.columna, e.offset, "string");
 									}
+									
+								}
+						:}*/
+							Expresion:e Mas Termino:t {:
+								if (t == null){
+									RESULT = null;
+								}else{
+									System.out.println("calculando " + e.id + " + " + t.id);
+									RESULT = new Expresion(e.id, e.linea, e.columna, e.offset, "string");									
+								}
+						:}
+						|   Expresion:e Por Termino:t {:
+								if (t == null){
+									RESULT = null;
+								}else{
+									System.out.println("calculando " + e.id + " * " + t.id);
+									RESULT = new Expresion(e.id, e.linea, e.columna, e.offset, "integer");
+								}
+						:}
+						|	Expresion:e Operador:o GuionBajo LineEnd Termino:t {:
+								if (t == null){
+									RESULT = null;
+								}else{
+									RESULT = new Expresion(e.id, e.linea, e.columna, e.offset, "boolean");
+								}
+						:}
+						|	Expresion:e Igual Termino:t {:
+								if (t == null){
+									RESULT = null;
+								}else{
+									RESULT = new Expresion(e.id, e.linea, e.columna, e.offset, "boolean");
 								}
 						:};
 
@@ -625,11 +486,18 @@ Termino					::= IntLiteral {:
 								}else{
 									RESULT = new Termino(p.id, p.linea, p.columna, p.offset, p.tipo);
 								}
+						:}
+						|	ParI Expresion:e ParD {:
+								if (e == null){
+									RESULT = null;
+								}else{
+									RESULT = new Termino(e.id, e.linea, e.columna, e.offset, e.tipo);
+								}
 						:};
 
-Operador				::= Mas
+Operador				::= Mas {: RESULT = "+"; :}
 						|	Menos
-						|	Por
+						|	Por	{: RESULT = "*"; :}
 						|	Entre
 						|	And
 						|	Or
@@ -751,8 +619,6 @@ BoolLiteral				::= True {:
 
 Distinto				::= Menor Mayor;
 
-Negativo				::= Menos;
-
 MethodCall				::= FuncEval LineEnd
 						|	Call FuncEval LineEnd;
 
@@ -777,6 +643,7 @@ FuncEval				::= Id Args:args {:
 											}
 										}
 									}
+									javax.swing.JOptionPane.showMessageDialog(null, "Tipo de funcion es " + f.tipo);
 									RESULT = new Termino(myid.value.toString(), myid.left, myid.right, myid.offset, f.tipo);
 								}
 						:};

@@ -56,12 +56,12 @@ public class Vbc {
 		
 	//try {
 		//VbParser parser = new VbParser(new VbLexer(new FileReader("src\\vbc\\a.vb")));
-		System.out.println("hello world");
+		//System.out.println("hello world");
 		IDE ide = new IDE();
 		ide.setVisible(true);
 		try {
 			//System.out.println(parser.parse().toString());
-			System.out.println("not auto parsing");
+			//System.out.println("not auto parsing");
 		} catch (Exception ex) {
 			Logger.getLogger(Vbc.class.getName()).log(Level.SEVERE, null, ex);
 		}
