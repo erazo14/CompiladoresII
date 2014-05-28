@@ -20,6 +20,11 @@ public class Metodo extends Simbolo{
 		this.parametros = new ArrayList<>();
 	}
 	
+	public Metodo(String id, Integer linea, Integer columna, Integer offset, String tipo, String lugar) {
+		super(id, linea, columna, offset, tipo, lugar);
+		this.parametros = new ArrayList<>();
+	}
+	
 	public boolean hasParam(String id){
 		for (Parametro p:this.parametros){
 			if (p.id.equalsIgnoreCase(id)){

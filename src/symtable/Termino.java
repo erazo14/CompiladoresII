@@ -14,4 +14,8 @@ public class Termino extends Simbolo{
 	public Termino(String id, Integer linea, Integer columna, Integer offset, String tipo) {
 		super(id, linea, columna, offset, tipo);
 	}
+	
+	public Termino(String id, Integer linea, Integer columna, Integer offset, String tipo, String lugar) {
+		super(id, linea, columna, offset, tipo, lugar);
+	}
 }

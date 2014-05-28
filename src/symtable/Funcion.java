@@ -16,4 +16,8 @@ public class Funcion extends Metodo{
 	public Funcion(String id, Integer linea, Integer columna, Integer offset, String tipo) {
 		super(id, linea, columna, offset, tipo);
 	}
+	
+	public Funcion(String id, Integer linea, Integer columna, Integer offset, String tipo, String lugar) {
+		super(id, linea, columna, offset, tipo, lugar);
+	}
 }

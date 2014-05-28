@@ -14,4 +14,8 @@ public class Sub extends Metodo{
 	public Sub(String id, Integer linea, Integer columna, Integer offset) {
 		super(id, linea, columna, offset, "void");
 	}
+	
+	public Sub(String id, Integer linea, Integer columna, Integer offset, String lugar) {
+		super(id, linea, columna, offset, "void", lugar);
+	}
 }

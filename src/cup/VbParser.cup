@@ -8,6 +8,7 @@ import lexer.VbLexer;
 import parser.VbSyntaxError;
 import parser.sym;
 import symtable.*;
+import intermedio.*;
 import org.fife.ui.rsyntaxtextarea.parser.Parser;
 import org.fife.ui.rsyntaxtextarea.parser.ExtendedHyperlinkListener;
 import org.fife.ui.rsyntaxtextarea.parser.ParseResult;
@@ -45,6 +46,7 @@ parser code {:
 	public void user_init(){
 		this.errLst = new ArrayList<>();
 		SymTable.init();
+		CuadTable.init();
 	}
 
 	public Symbol getCurToken(){
@@ -231,7 +233,8 @@ VarDecl					::= Dim Id As Tipo:tipo LineEnd {:
 									parser.syntax_error(myid);
 									parser.appendErr("La variable \"" + myid.value.toString() + "\" ya existe en este contexto");
 								}else{
-									SymTable.curScope.addVar(new Variable(myid.value.toString(), myid.left, myid.right, myid.offset, tipo.value.toString()));
+									Variable v = new Variable(myid.value.toString(), myid.left, myid.right, myid.offset, tipo.value.toString(), CuadTable.newTemp());
+									SymTable.curScope.addVar(v);
 								}
 
 								if (!SymTable.curScope.hasType(tipo.value.toString())){
@@ -358,14 +361,14 @@ Asignable				::= Id {:
 									parser.syntax_error(myid);
 									parser.appendErr("La variable \"" + myid.value.toString() + "\" no ha sido declarada");
 								}else{
-									RESULT = new Asignable(v.id, v.linea, v.columna, v.offset, v.tipo, "variable");
+									RESULT = new Asignable(v.id, v.linea, v.columna, v.offset, v.tipo, "variable", CuadTable.newTemp());
 								}
 						:}
 						|	Property:property {:
 								if (property == null){
 									RESULT = null;
 								}else{
-									RESULT = new Asignable(property.id, property.linea, property.columna, property.offset, property.tipo, "propiedad");
+									RESULT = new Asignable(property.id, property.linea, property.columna, property.offset, property.tipo, "propiedad", CuadTable.newTemp());
 								}
 						:};
 
@@ -376,6 +379,8 @@ Asignacion				::= Asignable:a Igual Expresion:e LineEnd {:
 										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
 										parser.syntax_error(tok);
 										parser.appendErr("Asignacion ilegal (" + a.tipo + " = " + e.tipo + ")");
+									}else{
+										CuadTable.gen("=", e.lugar, a.lugar);
 									}
 								}
 						:};
@@ -562,7 +567,7 @@ Expresion				::= Expresion:e1 Mas Expresion:e2 {:
 						:}
 						|   Termino:t {:
 								if (t != null){
-									RESULT = new Expresion(t.id, t.linea, t.columna, t.offset, t.tipo);
+									RESULT = new Expresion(t.id, t.linea, t.columna, t.offset, t.tipo, t.lugar);
 								}else{
 									RESULT = null;
 								}
@@ -586,7 +591,10 @@ Expresion				::= Expresion:e1 Mas Expresion:e2 {:
 
 Termino					::= IntLiteral {:  
 								MyToken intLit = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
-								RESULT = new Termino(intLit.value.toString(), intLit.left, intLit.right, intLit.offset, "integer");
+								Termino t = new Termino(intLit.value.toString(), intLit.left, intLit.right, intLit.offset, "integer", CuadTable.newTemp());
+								String i = intLit.value.toString();
+								CuadTable.gen("=", i, t.lugar);
+								RESULT = t;
 						:}
 						|	BoolLiteral:b {:
 								RESULT = new Termino(b.id, b.linea, b.columna, b.offset, "boolean");

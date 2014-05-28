@@ -16,6 +16,7 @@ public class Simbolo {
 	public Integer columna;
 	public Integer offset;
 	public String tipo;
+	public String lugar;
 	
 	public Simbolo(String id, Integer linea, Integer columna, Integer offset, String tipo) {
 		this.id = id;
@@ -23,5 +24,15 @@ public class Simbolo {
 		this.columna = columna;
 		this.offset = offset;
 		this.tipo = tipo;
+		this.lugar = null;
+	}
+	
+	public Simbolo(String id, Integer linea, Integer columna, Integer offset, String tipo, String lugar) {
+		this.id = id;
+		this.linea = linea;
+		this.columna = columna;
+		this.offset = offset;
+		this.tipo = tipo;
+		this.lugar = lugar;
 	}
 }

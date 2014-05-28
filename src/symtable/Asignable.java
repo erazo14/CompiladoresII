@@ -17,4 +17,9 @@ public class Asignable extends Simbolo{
 		super(id, linea, columna, offset, tipo);
 		this.varOrProp = varOrProp;
 	}
+	
+	public Asignable(String id, Integer linea, Integer columna, Integer offset, String tipo, String varOrProp, String lugar) {
+		super(id, linea, columna, offset, tipo, lugar);
+		this.varOrProp = varOrProp;
+	}
 }

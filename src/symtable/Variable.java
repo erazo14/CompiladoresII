@@ -14,4 +14,8 @@ public class Variable extends Simbolo{
 	public Variable(String id, Integer linea, Integer columna, Integer offset, String tipo) {
 		super(id, linea, columna, offset, tipo);
 	}
+	
+	public Variable(String id, Integer linea, Integer columna, Integer offset, String tipo, String lugar) {
+		super(id, linea, columna, offset, tipo, lugar);
+	}
 }

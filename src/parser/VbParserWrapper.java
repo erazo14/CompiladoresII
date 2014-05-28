@@ -5,6 +5,8 @@
  */
 
 package parser;
+import intermedio.CuadTable;
+import intermedio.Cuadruplo;
 import java.awt.Color;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -85,6 +87,9 @@ public class VbParserWrapper implements Parser{
 			}else{
 				this.output.setForeground(new Color(0,128,0));
 				this.output.setText("OK, 0 Errores");
+				for (Cuadruplo c:CuadTable.cuadruplos){
+					System.out.println(c.operator + " " + c.operand1 + " " + c.operand2 + " " + c.dest);
+				}
 			}
 		}
 		for (Scope s:SymTable.allScopes()){
