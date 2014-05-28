@@ -193,7 +193,8 @@ non terminal		PropChain;
 non terminal		MyToken Tipo;
 
 /* -------------Precedence and Associatively of Terminals Section----------- */
-precedence left And, Or;
+precedence left Or;
+precedence left And;
 precedence left Menor, MenorIgual, Mayor, MayorIgual, Igual, Distinto;
 precedence left Mas, Menos, Ampersand;
 precedence left Por, Entre;
@@ -828,7 +829,7 @@ Property				::= Id {:
 									}
 								}
 						:} PropChain:propChain {: 
-								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
 								RESULT = new Termino(myid.value.toString(), myid.left, myid.right, myid.offset, propChain.toString());
 						:};
 
@@ -840,14 +841,14 @@ PropChain				::= Punto Id {:
 									if (t == null || SymTable.isPrimitive(tipoCurProp)){
 										MyToken myid = new MyToken(sym.Id, SymTable.curProp.linea, SymTable.curProp.columna, SymTable.curProp.offset);
 										parser.syntax_error(myid);
-										parser.appendErr("\"" + tipoCurProp + "\" no es un Type3");
+										parser.appendErr("\"" + tipoCurProp + "\" no es un Type");
 										SymTable.curProp = null;
 									}else{
 										MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
 										Variable v = t.findProp(myid.value.toString());
 										if (v == null){
 											parser.syntax_error(myid);
-											parser.appendErr("Type \"" + t.id + "\" no tiene una propiedad llamada \"" + myid.value.toString() + "\"1");
+											parser.appendErr("Type \"" + t.id + "\" no tiene una propiedad llamada \"" + myid.value.toString() + "\"");
 											SymTable.curProp = null;
 										}else{
 											RESULT = v.tipo;
@@ -863,14 +864,14 @@ PropChain				::= Punto Id {:
 									if (t == null || SymTable.isPrimitive(tipoCurProp)){
 										MyToken myid = new MyToken(sym.Id, SymTable.curProp.linea, SymTable.curProp.columna, SymTable.curProp.offset);
 										parser.syntax_error(myid);
-										parser.appendErr("\"" + tipoCurProp + "\" no es un Type1");
+										parser.appendErr("\"" + tipoCurProp + "\" no es un Type");
 										SymTable.curProp = null;
 									}else{
 										MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
 										Variable v = t.findProp(myid.value.toString());
 										if (v == null){
 											parser.syntax_error(myid);
-											parser.appendErr("Type \"" + t.id + "\" no tiene una propiedad llamada \"" + myid.value.toString() + "\"2");
+											parser.appendErr("Type \"" + t.id + "\" no tiene una propiedad llamada \"" + myid.value.toString() + "\"");
 											SymTable.curProp = null;
 										}else{
 											if (!SymTable.isPrimitive(v.tipo)){
@@ -878,14 +879,14 @@ PropChain				::= Punto Id {:
 
 												if (t == null || SymTable.isPrimitive(tipoCurProp)){
 													parser.syntax_error(myid);
-													parser.appendErr("\"" + myid.value.toString() + "\" no es un Type5");
+													parser.appendErr("\"" + myid.value.toString() + "\" no es un Type");
 													SymTable.curProp = null;
 												}else{
 													SymTable.curProp = new Property(v.id, v.linea, v.columna, v.offset, v.tipo);
 												}
 											}else{
 												parser.syntax_error(myid);
-												parser.appendErr("\"" + myid.value.toString() + "\" no es un Type2");
+												parser.appendErr("\"" + myid.value.toString() + "\" no es un Type");
 												SymTable.curProp = null;
 											}
 										}
