@@ -28,6 +28,18 @@ public final class CuadTable {
 		CuadTable.cuadruplos.clear();
 		CuadTable.tempSequence = 0;
 	}
+        
+        public static void CreaLista(Integer posicion){
+            
+        }
+        
+        public static void FucionaLista(String[] lista1, String[] lista2){
+            
+        }
+        
+        public static void Completa(String[] lista, Integer Posicion){
+            
+        }
 	
 	public static void gen(String operador, String...args){
 		operador = operador.toLowerCase();
