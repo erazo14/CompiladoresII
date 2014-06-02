@@ -148,7 +148,7 @@ terminal			Dim,Mas,Menos,Por,Entre,Menor,Mayor,Not,And,Or,
 					CambioDeLinea,Concatenar,InicioDeLinea,NuevaLinea,MayorIgual,
 					MenorIgual,False,Call,Exit,Input,Type,Ampersand;
 
-terminal			Public,Private;
+terminal			Public,Private; // estas nose usan
 
 terminal			FinDeLinea;
 
@@ -394,7 +394,8 @@ Expresion				::= Expresion:e1 Mas Expresion:e2 {:
 								if (e1 != null && e2 != null){
 									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
 										RESULT = new Expresion("", 0, 0, 0, "integer");
-									}else{
+                                                                                CuadTable.gen("+", e1.lugar, e2.lugar, a.lugar);
+                                                                        }else{
 										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
 										parser.syntax_error(tok);
 										parser.appendErr("Operacion ilegal (" + e1.tipo + " + " + e2.tipo + ")");
@@ -408,6 +409,7 @@ Expresion				::= Expresion:e1 Mas Expresion:e2 {:
 								if (e1 != null && e2 != null){
 									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
 										RESULT = new Expresion("", 0, 0, 0, "integer");
+                                                                                CuadTable.gen("-", e1.lugar, e2.lugar, a.lugar);
 									}else{
 										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
 										parser.syntax_error(tok);
@@ -434,6 +436,7 @@ Expresion				::= Expresion:e1 Mas Expresion:e2 {:
 								if (e1 != null && e2 != null){
 									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
 										RESULT = new Expresion("", 0, 0, 0, "integer");
+                                                                                CuadTable.gen("*", e1.lugar, e2.lugar, a.lugar);
 									}else{
 										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
 										parser.syntax_error(tok);
@@ -446,6 +449,7 @@ Expresion				::= Expresion:e1 Mas Expresion:e2 {:
 								if (e1 != null && e2 != null){
 									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
 										RESULT = new Expresion("", 0, 0, 0, "integer");
+                                                                                CuadTable.gen("/", e1.lugar, e2.lugar, a.lugar);
 									}else{
 										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
 										parser.syntax_error(tok);

@@ -45,9 +45,12 @@ public final class CuadTable {
 		operador = operador.toLowerCase();
 		
 		switch(operador){
-			case "+": 
+			case "+":
+                                CuadTable.cuadruplos.add(new Cuadruplo(operador, args[0], args[1], args[2]));
 			case "-":
+                                CuadTable.cuadruplos.add(new Cuadruplo(operador, args[0], args[1], args[2]));
 			case "*":
+                                CuadTable.cuadruplos.add(new Cuadruplo(operador, args[0], args[1], args[2]));
 			case "/":
 				CuadTable.cuadruplos.add(new Cuadruplo(operador, args[0], args[1], args[2]));
 				break;
@@ -61,4 +64,6 @@ public final class CuadTable {
 				break;
 		}
 	}
+        
+        
 }
