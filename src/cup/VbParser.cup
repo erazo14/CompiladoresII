@@ -380,7 +380,7 @@ Asignacion				::= Asignable:a Igual Expresion:e LineEnd {:
 										parser.syntax_error(tok);
 										parser.appendErr("Asignacion ilegal (" + a.tipo + " = " + e.tipo + ")");
 									}else{
-                                                                        	CuadTable.gen("=", e.lugar, a.lugar);
+										CuadTable.gen("=", e.lugar, a.lugar);
 									}
 								}
 						:};
