@@ -6,8 +6,6 @@
 
 package intermedio;
 
-import java.util.ArrayList;
-
 /**
  *
  * @author owner
@@ -17,7 +15,6 @@ public class Cuadruplo {
     public String operand1;
     public String operand2;
     public String dest;
-    public ArrayList<Integer> listaSig;
     
     Cuadruplo(String operator , String operand1, String operand2, String dest){
         this.operator = operator;
