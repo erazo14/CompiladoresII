@@ -23,16 +23,41 @@ public class Cuadruplo {
         this.dest = dest;
     }
     
-    Cuadruplo(String operator , String operand1, String dest){
-        this.operator = operator;
+    Cuadruplo(String operator, String operand1, String dest){
+		this.operator = operator;
         this.operand1 = operand1;
+		this.operand2 = null;
         this.dest = dest;
     }
     
     Cuadruplo(String operator, String operand1){
-        this.operator = operator;
+		this.operator = operator;
         this.operand1 = operand1;
+		this.operand2 = null;
+		this.dest = null;
     }
     
-    
+	@Override
+    public String toString(){
+		switch(this.operator){
+			case "+":
+			case "-":
+			case "*":
+			case "/":
+			case "&":
+				return this.dest + " = " + this.operand1 + " " + this.operator + " " + this.operand2;
+			case "=":
+				return this.dest + " = " + this.operand1;
+			case "if<":
+				return "if " + this.operand1 + " < " + this.operand2 + " goto " + this.dest;
+			case "if=":
+				return "if " + this.operand1 + " = " + this.operand2 + " goto " + this.dest;
+			case "if":
+				return "if " + this.operand1 + " = 1 goto " + this.dest;
+			case "goto": 
+				return "goto " + this.operand1;
+			default:
+				return this.operator + ", " + this.operand1 + ", " + this.operand2 + ", " + this.dest;
+		}
+	}
 }

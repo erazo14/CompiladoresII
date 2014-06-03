@@ -12,13 +12,14 @@ import java.util.ArrayList;
  *
  * @author Armando
  */
-public class Expresion extends Simbolo{	
-	public Expresion(String id, Integer linea, Integer columna, Integer offset, String tipo) {
+public class Statement extends Simbolo{	
+	public Statement(String id, Integer linea, Integer columna, Integer offset, String tipo) {
 		super(id, linea, columna, offset, tipo);
-		
+		this.lstSig = new ArrayList<>();
 	}
 	
-	public Expresion(String id, Integer linea, Integer columna, Integer offset, String tipo, String lugar) {
+	public Statement(String id, Integer linea, Integer columna, Integer offset, String tipo, String lugar) {
 		super(id, linea, columna, offset, tipo, lugar);
+		this.lstSig = new ArrayList<>();
 	}
 }

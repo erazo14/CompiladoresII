@@ -88,7 +88,7 @@ public class VbParserWrapper implements Parser{
 				this.output.setForeground(new Color(0,128,0));
 				this.output.setText("OK, 0 Errores");
 				for (Cuadruplo c:CuadTable.cuadruplos){
-					System.out.println(c.operator + " " + c.operand1 + " " + c.operand2 + " " + c.dest);
+					System.out.println(c.toString());
 				}
 			}
 		}

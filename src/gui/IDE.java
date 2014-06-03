@@ -1,5 +1,9 @@
 package gui;
+import intermedio.CuadTable;
+import intermedio.Cuadruplo;
 import java.awt.Color;
+import javax.swing.JFrame;
+import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -66,11 +70,18 @@ public class IDE extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jMenu4 = new javax.swing.JMenu();
         jSplitPane1 = new javax.swing.JSplitPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         output = new javax.swing.JTextArea();
         rTextScrollPane1 = new org.fife.ui.rtextarea.RTextScrollPane();
         editor = new org.fife.ui.rsyntaxtextarea.RSyntaxTextArea();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jMenu2 = new javax.swing.JMenu();
+        jMenu3 = new javax.swing.JMenu();
+
+        jMenu4.setText("jMenu4");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -83,6 +94,11 @@ public class IDE extends javax.swing.JFrame {
         output.setFont(new java.awt.Font("Consolas", 1, 14)); // NOI18N
         output.setForeground(new java.awt.Color(255, 0, 0));
         output.setRows(5);
+        output.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                outputMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(output);
 
         jSplitPane1.setBottomComponent(jScrollPane1);
@@ -93,6 +109,23 @@ public class IDE extends javax.swing.JFrame {
 
         jSplitPane1.setLeftComponent(rTextScrollPane1);
 
+        jMenu1.setText("File");
+        jMenuBar1.add(jMenu1);
+
+        jMenu2.setText("Edit");
+        jMenuBar1.add(jMenu2);
+
+        jMenu3.setText("Ver CI");
+        jMenu3.setRolloverEnabled(false);
+        jMenu3.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jMenu3MouseClicked(evt);
+            }
+        });
+        jMenuBar1.add(jMenu3);
+
+        setJMenuBar(jMenuBar1);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -101,11 +134,21 @@ public class IDE extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 512, Short.MAX_VALUE)
+            .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 491, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void outputMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_outputMouseClicked
+
+    }//GEN-LAST:event_outputMouseClicked
+
+    private void jMenu3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenu3MouseClicked
+		CIViewer viewer = new CIViewer();
+		viewer.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		viewer.setVisible(true);
+    }//GEN-LAST:event_jMenu3MouseClicked
 
 	
 	/**
@@ -113,6 +156,11 @@ public class IDE extends javax.swing.JFrame {
 	 */
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private static org.fife.ui.rsyntaxtextarea.RSyntaxTextArea editor;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenu jMenu3;
+    private javax.swing.JMenu jMenu4;
+    private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSplitPane jSplitPane1;
     private static javax.swing.JTextArea output;

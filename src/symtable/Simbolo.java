@@ -6,6 +6,8 @@
 
 package symtable;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author Armando
@@ -17,6 +19,9 @@ public class Simbolo {
 	public Integer offset;
 	public String tipo;
 	public String lugar;
+	public ArrayList<Integer> lstVerd;
+	public ArrayList<Integer> lstFals;
+	public ArrayList<Integer> lstSig;
 	
 	public Simbolo(String id, Integer linea, Integer columna, Integer offset, String tipo) {
 		this.id = id;
@@ -25,6 +30,9 @@ public class Simbolo {
 		this.offset = offset;
 		this.tipo = tipo;
 		this.lugar = null;
+		this.lstVerd = new ArrayList<>();
+		this.lstFals = new ArrayList<>();
+		this.lstSig = new ArrayList<>();
 	}
 	
 	public Simbolo(String id, Integer linea, Integer columna, Integer offset, String tipo, String lugar) {
@@ -34,5 +42,8 @@ public class Simbolo {
 		this.offset = offset;
 		this.tipo = tipo;
 		this.lugar = lugar;
+		this.lstVerd = new ArrayList<>();
+		this.lstFals = new ArrayList<>();
+		this.lstSig = new ArrayList<>();
 	}
 }

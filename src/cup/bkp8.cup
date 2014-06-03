@@ -163,15 +163,13 @@ terminal			IntLiteral, StrLiteral;
 
 non terminal		Integer M;
 
-non terminal		ArrayList<Integer> N;
-
 non terminal		Literal BoolLiteral;
 
 non terminal		ProgStart, Root, RootStmts, RootStmt, RootDecl, VarDecl ,
 					BlockStmts, BlockStmt, BlockDecl, IdLst,
 					FuncDecl, FuncBody, SubDecl, SubBody;
 
-non terminal		Simbolo Block;
+non terminal		Block Block;
 
 non terminal		MainDecl, MainHead, MainBody;
 
@@ -185,11 +183,7 @@ non terminal		Asignacion, Operador;
 
 non terminal		Expresion Expresion;
 
-non terminal		ForLoop, DoWhile, IfStmt;
-
-non terminal		Simbolo ElseIfs;
-
-non terminal		Integer ElseOpt;
+non terminal		ForLoop, DoWhile, IfStmt, ElseStmts;
 
 non terminal		PassMech;
 
@@ -229,18 +223,20 @@ ProgStart				::= Root;
 
 /* ROOT */
 
-Root					::= RootStmts | /* lambda */;
+Root					::= RootStmts | LineEnd RootStmts;
 
 RootStmts				::= RootStmt
 						|	RootStmts RootStmt;
 
-RootStmt				::= VarDecl LineEnd
-						|	SubDecl LineEnd
-						|	FuncDecl LineEnd
-						|	TypeDecl LineEnd;
+RootStmt				::= RootDecl | error {: parser.appendErr("error"); :};
 
-VarDecl					::= Dim Id As Tipo:tipo {: 
-								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
+RootDecl				::= VarDecl
+						|	SubDecl
+						|	FuncDecl
+						|	TypeDecl;
+
+VarDecl					::= Dim Id As Tipo:tipo LineEnd {: 
+								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-3);
 
 								if (SymTable.curScope.hasLocalVar(myid.value.toString())){
 									parser.syntax_error(myid);
@@ -254,7 +250,10 @@ VarDecl					::= Dim Id As Tipo:tipo {:
 									parser.syntax_error(tipo);
 									parser.appendErr("\"" + tipo.value.toString() + "\" no es un tipo valido");
 								}
-						:};
+						:}
+						|	Dim error LineEnd {: parser.appendErr("Se esperaba Id"); :}
+						|	Dim Id error LineEnd {: parser.appendErr("Se esperaba 'As'"); :}
+						|	Dim Id As error LineEnd {: parser.appendErr("Se esperaba Tipo"); :};
 
 SubDecl					::= Sub Id {: 
 								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
@@ -275,7 +274,7 @@ SubDecl					::= Sub Id {:
 								SymTable.curScope.addSub(newSub);
 								SymTable.curMethod = newSub;
 								SymTable.createSubScope(myid.value.toString(), myid.left, myid.right, myid.offset);
-						:} Params LineEnd Block End Sub {:
+						:} Params Block End Sub LineEnd {:
 								SymTable.endScope();
 								SymTable.curMethod = null;
 						:};
@@ -304,25 +303,25 @@ FuncDecl				::= Function Id {:
 								}
 
 								SymTable.curMethod = null;
-						:} LineEnd Block {:
+						:} Block {:
 								SymTable.endScope();
-						:}End Function;
+						:}End Function LineEnd;
 
-TypeDecl				::= Type Id:id LineEnd {: 
+TypeDecl				::= Type Id:id {: 
 								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
 								TypeStruct t = new TypeStruct(myid.value.toString(), myid.left, myid.right, myid.offset);
 								SymTable.curTypeStruct = t;
 								SymTable.curScope.addTypeStruct(t);
-						:} TypeBlock End Type {:
+						:} TypeBlock End Type LineEnd {:
 								SymTable.curTypeStruct = null;
 						:};
 
-TypeBlock				::= TypeBlockStmts;
+TypeBlock				::= LineEnd TypeBlockStmts | LineEnd;
 
 TypeBlockStmts			::= TypeVarDecl
-						|	TypeBlockStmts LineEnd TypeVarDecl;
+						|	TypeBlockStmts TypeVarDecl;
 
-TypeVarDecl				::= Id As Tipo:tipo {:
+TypeVarDecl				::= Id As Tipo:tipo LineEnd {:
 								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-3);
 
 								if (SymTable.curTypeStruct.hasProp(myid.value.toString())){
@@ -336,23 +335,28 @@ TypeVarDecl				::= Id As Tipo:tipo {:
 
 									SymTable.curTypeStruct.addProp(new Variable(myid.value.toString(), myid.left, myid.right, myid.offset, tipo.value.toString()));
 								}
-						:};
+						:};/*
+						|	Id error LineEnd {: parser.appendErr("Se esperaba 'As'"); :}
+						|	Id As error LineEnd {: parser.appendErr("Se esperaba Tipo"); :}
+						|	Id As Tipo error LineEnd {: parser.appendErr("Se esperaba fin de linea"); :}
+						|	error TypeVarDecl {: parser.appendErr("Sentencia invalida dentro de Type"); :};*/
 
 
 
 /* BLOCK */
 
-Block					::= BlockStmts | /* lambda */;
+Block					::= LineEnd BlockStmts {: RESULT = new Block("", 0, 0, 0, "", ""); :}
+						|	LineEnd;
 
 BlockStmts				::= BlockStmt
 						|	BlockStmts BlockStmt;
 
-BlockStmt				::= VarDecl LineEnd
-						|	ForLoop LineEnd
-						|	DoWhile LineEnd
-						|	IfStmt LineEnd
-						|	Asignacion LineEnd
-						|	MethodCall LineEnd;
+BlockStmt				::= VarDecl
+						|	ForLoop
+						|	DoWhile
+						|	IfStmt
+						|	Asignacion
+						|	MethodCall;
 
 
 
@@ -378,7 +382,7 @@ Asignable				::= Id {:
 						:};
 
 
-Asignacion				::= Asignable:a Igual Expresion:e {:
+Asignacion				::= Asignable:a Igual Expresion:e LineEnd {:
 								if (a != null && e != null){
 									if (!a.tipo.equalsIgnoreCase(e.tipo)){
 										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
@@ -687,51 +691,29 @@ ForLoop					::= For Id Igual Expresion To Expresion {:
 								SymTable.createSubScope("For" + SymTable.blockName(), forTok.left, forTok.right, forTok.offset); 	
 						:} Block {:
 								SymTable.endScope();
-						:} Next Id;
+						:} Next Id LineEnd;
 
 DoWhile					::= Do While Expresion {:
 								MyToken doTok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
 								SymTable.createSubScope("Do" + SymTable.blockName(), doTok.left, doTok.right, doTok.offset); 	
 						:} Block {:
 								SymTable.endScope();
-						:} Loop;
+						:} Loop LineEnd;
 
 IfStmt					::= If Expresion:e Then {:
 								MyToken ifTok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
 								SymTable.createSubScope("If" + SymTable.blockName(), ifTok.left, ifTok.right, ifTok.offset); 
-						:} LineEnd M:m1 Block N:n {: 
+						:} M:m Block:block {: 
 								SymTable.endScope();
-								//CuadTable.backpatch(e.lstVerd, m1);
-						:} ElseIfs:elseIfs ElseOpt:elseOpt End If M:m2 {:
-								//Statement s = new Statement("", 0, 0, 0, "", "");
+								CuadTable.backpatch(e.lstVerd);
+						:} ElseStmts End If LineEnd {: 
+								CuadTable.backpatch(e.lstVerd, m);
+								Statement s = new Statement("", 0, 0, 0, "", "");
 								//s.lstSig = CuadTable.merge(e.lstFals, block.lstSig);
-								//parser.msg("generando if=");
-								//CuadTable.gen("if=", e.lugar, "1", m.toString());
-								CuadTable.backpatch(e.lstVerd, m1);
-								CuadTable.backpatch(n, m2);
-								
-								if (elseIfs != null) {
-									CuadTable.backpatch(e.lstFals, elseIfs.lugar);
-									CuadTable.backpatch(elseIfs.lstSig, m2);
-									if (elseOpt != null){
-										CuadTable.backpatch(elseIfs.lstFals, elseOpt);
-									}else{
-										CuadTable.backpatch(elseIfs.lstFals, m2);
-									}
-								}else if (elseOpt != null){
-									CuadTable.backpatch(e.lstFals, elseOpt);
-								}else{
-									CuadTable.backpatch(e.lstFals, m2);
-								}
+								parser.msg("generando if=");
+								CuadTable.gen("if=", e.lugar, "1", m.toString());
 						:};
 
-ElseIfs					::= ElseIfs ElseIf M:m1 Expresion:e Then LineEnd M:m2 Block {://n:}
-						|	{: RESULT = null; :};
-
-ElseOpt					::= Else M:m Expresion {: RESULT = m; :}
-						|	{: RESULT = null; :};
-
-/*
 ElseStmts				::= ElseIf Expresion Then {: 
 								MyToken myelif = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
 								SymTable.createSubScope("ElseIf" + SymTable.blockName(), myelif.left, myelif.right, myelif.offset); 
@@ -744,9 +726,9 @@ ElseStmts				::= ElseIf Expresion Then {:
 						:} Block {: 
 								SymTable.endScope();
 						:}
-						|;
+						|	/* lambda */;
 
-*/
+
 /* Tipos */
 
 Tipo					::= Integer:i {: RESULT = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top); :}
@@ -808,10 +790,6 @@ PassMech				::= ByVal:byVal {: RESULT = byVal.toString().toLowerCase(); :}
 
 M						::= {: RESULT = CuadTable.sigCuad; :};
 
-N						::= {: 
-								RESULT = CuadTable.makeList(CuadTable.sigCuad);
-								CuadTable.gen("goto", "");
-							:};
 BoolLiteral				::= True {:
 								MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
 								RESULT = new Literal("true", tok.left, tok.right, tok.offset, "boolean", "1");
@@ -825,8 +803,8 @@ Distinto				::= Menor Mayor;
 
 Negativo				::= Menos;
 
-MethodCall				::= FuncEval
-						|	Call FuncEval;
+MethodCall				::= FuncEval LineEnd
+						|	Call FuncEval LineEnd;
 
 FuncEval				::= Id Args:args {:
 								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
