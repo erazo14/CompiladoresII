@@ -12,7 +12,7 @@ import java.util.ArrayList;
  *
  * @author Armando
  */
-public final class SymTable {
+public  class SymTable {
 	public static Scope rootScope;
 	public static Scope curScope;
 	public static TypeStruct curTypeStruct;
