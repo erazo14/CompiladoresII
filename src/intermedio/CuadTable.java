@@ -16,6 +16,7 @@ public final class CuadTable {
 	public static ArrayList<Cuadruplo> cuadruplos = new ArrayList<>();
 	public static Integer sigCuad = 0;
 	private static Integer tempSequence = 1;
+        private static Integer etiqSequence = 1;
 	
 	public CuadTable(){
 		//algo
@@ -24,10 +25,15 @@ public final class CuadTable {
 	public static String newTemp(){
 		return "t" + CuadTable.tempSequence++;
 	}
+        
+        public static String newetiq(){
+		return "_etiq" + CuadTable.etiqSequence++;
+	}
 	
 	public static void init(){
 		CuadTable.cuadruplos.clear();
 		CuadTable.tempSequence = 1;
+                CuadTable.etiqSequence = 1;
 		CuadTable.sigCuad = 0;
 	}
 	
@@ -47,9 +53,10 @@ public final class CuadTable {
 	
 	public static void backpatch(ArrayList lista, String cuad){
 		for (int i = 0; i < lista.size(); i++){
+                        Cuadruplo nuevo = CuadTable.cuadruplos.get((int) lista.get(i)) ;
 			System.out.println("patching line " + lista.get(i) + " with " + cuad);
-			System.out.println("line " + lista.get(i) + ": " + CuadTable.cuadruplos.get(i).toString());
-			CuadTable.cuadruplos.get(i).dest = cuad;
+			System.out.println("line " + lista.get(i) + ": " + nuevo.toString());
+			nuevo.dest = cuad;
 		}
 	}
 	
@@ -72,11 +79,23 @@ public final class CuadTable {
 			case "if<":
 				CuadTable.cuadruplos.add(new Cuadruplo("if<", args[0], args[1], args[2]));
 				break;
+                        case "if>":
+				CuadTable.cuadruplos.add(new Cuadruplo("if>", args[0], args[1], args[2]));
+				break;
+                        case "if<=":
+				CuadTable.cuadruplos.add(new Cuadruplo("if<=", args[0], args[1], args[2]));
+				break;
+                        case "if>=":
+				CuadTable.cuadruplos.add(new Cuadruplo("if>=", args[0], args[1], args[2]));
+				break;
 			case "if=":
 				CuadTable.cuadruplos.add(new Cuadruplo("if=", args[0], args[1], args[2]));
 				break;
 			case "if":
 				CuadTable.cuadruplos.add(new Cuadruplo("if", args[0], args[1]));
+				break;
+                        case "_etiq":
+				CuadTable.cuadruplos.add(new Cuadruplo(newetiq()));
 				break;
 			default:	
 				break;

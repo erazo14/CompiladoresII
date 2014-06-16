@@ -168,10 +168,14 @@ non terminal		ArrayList<Integer> N;
 non terminal		Literal BoolLiteral;
 
 non terminal		ProgStart, Root, RootStmts, RootStmt, RootDecl, VarDecl ,
-					BlockStmts, BlockStmt, BlockDecl, IdLst,
+                                        BlockDecl, IdLst,
 					FuncDecl, FuncBody, SubDecl, SubBody;
 
 non terminal		Simbolo Block;
+
+non terminal            Simbolo BlockStmts;
+
+non terminal            Simbolo BlockStmt;
 
 non terminal		MainDecl, MainHead, MainBody;
 
@@ -185,7 +189,9 @@ non terminal		Asignacion, Operador;
 
 non terminal		Expresion Expresion;
 
-non terminal		ForLoop, DoWhile, IfStmt;
+non terminal		ForLoop, DoWhile; 
+
+non terminal            IfStmt;
 
 non terminal		Simbolo ElseIfs;
 
@@ -205,7 +211,7 @@ non terminal		MethodCall, LineEnd;
 
 non terminal		Termino Property;
 
-non terminal		PropChain;
+non terminal		PropChain, operel;
 
 non terminal		MyToken Tipo;
 
@@ -395,6 +401,23 @@ Asignacion				::= Asignable:a Igual Expresion:e {:
 /*Condicion				::= Expresion
 						|	Comparacion;*/
 
+operel                  ::= Menor {:MyToken intLit = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+                                    String valor = intLit.value.toString();
+                                    RESULT = valor.toString();
+                                  :}
+                          | Mayor {:MyToken intLit = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+                                    String valor = intLit.value.toString();
+                                    RESULT = valor.toString();
+                                  :}
+                          | MenorIgual{:MyToken intLit = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+                                    String valor = intLit.value.toString();
+                                    RESULT = valor.toString();
+                                      :} 
+                          | MayorIgual{:MyToken intLit = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+                                    String valor = intLit.value.toString();
+                                    RESULT = valor.toString();
+                                      :};
+
 Expresion				::= Expresion:e1 Mas Expresion:e2 {:
 								if (e1 != null && e2 != null){
 									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
@@ -469,63 +492,11 @@ Expresion				::= Expresion:e1 Mas Expresion:e2 {:
 									}
 								}
 						:}
-						|   Expresion:e1 Menor Expresion:e2 {:
-								if (e1 != null && e2 != null){
-									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
-										Expresion nuevaExp = new Expresion("", 0, 0, 0, "boolean", CuadTable.newTemp());
-										//nuevaExp.lstVerd = CuadTable.makeList(CuadTable.sigCuad+3);
-										//nuevaExp.lstFals = CuadTable.makeList(CuadTable.sigCuad+1);
-										//parser.msg("e.lstverd[0] = " + nuevaExp.lstVerd.get(0));
-										//parser.msg("e.lstFals[0] = " + nuevaExp.lstFals.get(0));
-										CuadTable.gen("if<", e1.lugar, e2.lugar, CuadTable.sigCuad + 3 + "");
-										CuadTable.gen("=", "0", nuevaExp.lugar);
-										CuadTable.gen("goto", CuadTable.sigCuad + 2 + "");
-										CuadTable.gen("=", "1", nuevaExp.lugar);
-										RESULT = nuevaExp;
-									}else{
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal (" + e1.tipo + " < " + e2.tipo + ")");
-										RESULT = null;
-									}
-								}
-						:}
-						|   Expresion:e1 MenorIgual Expresion:e2 {:
-								if (e1 != null && e2 != null){
-									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
-										RESULT = new Expresion("", 0, 0, 0, "boolean");
-									}else{
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal (" + e1.tipo + " <= " + e2.tipo + ")");
-										RESULT = null;
-									}
-								}
-						:}
-						|   Expresion:e1 Mayor Expresion:e2 {:
-								if (e1 != null && e2 != null){
-									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
-										RESULT = new Expresion("", 0, 0, 0, "boolean");
-									}else{
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal (" + e1.tipo + " > " + e2.tipo + ")");
-										RESULT = null;
-									}
-								}
-						:}
-						|   Expresion:e1 MayorIgual Expresion:e2 {:
-								if (e1 != null && e2 != null){
-									if (e1.tipo.equalsIgnoreCase("integer") && e2.tipo.equalsIgnoreCase("integer")){
-										RESULT = new Expresion("", 0, 0, 0, "boolean");
-									}else{
-										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
-										parser.syntax_error(tok);
-										parser.appendErr("Operacion ilegal (" + e1.tipo + " >= " + e2.tipo + ")");
-										RESULT = null;
-									}
-								}
-						:}
+						
+
+
+
+
 						|	Expresion:e1 Igual Expresion:e2 {:
 								if (e1 != null && e2 != null){
 									if (e1.tipo.equalsIgnoreCase(e2.tipo)){
@@ -553,7 +524,7 @@ Expresion				::= Expresion:e1 Mas Expresion:e2 {:
 						|   Expresion:e1 And M:m Expresion:e2 {:
 								if (e1 != null && e2 != null){
 									if (e1.tipo.equalsIgnoreCase("boolean") && e1.tipo.equalsIgnoreCase(e2.tipo)){
-										Expresion nuevaExp = new Expresion("", 0, 0, 0, "boolean", CuadTable.newTemp());
+										Expresion nuevaExp = new Expresion("", 0, 0, 0, "boolean");
 										CuadTable.backpatch(e1.lstVerd, m.toString());
 										nuevaExp.lstVerd = e2.lstVerd;
 										nuevaExp.lstFals = CuadTable.merge(e1.lstFals, e2.lstFals);
@@ -566,10 +537,14 @@ Expresion				::= Expresion:e1 Mas Expresion:e2 {:
 									}
 								}
 						:}
-						|   Expresion:e1 Or Expresion:e2 {:
+						|   Expresion:e1 Or M:m Expresion:e2 {:
 								if (e1 != null && e2 != null){
 									if (e1.tipo.equalsIgnoreCase("boolean") && e1.tipo.equalsIgnoreCase(e2.tipo)){
-										RESULT = new Expresion("", 0, 0, 0, "boolean");
+										Expresion nuevaExp = new Expresion("", 0, 0, 0, "boolean");
+										CuadTable.backpatch(e1.lstFals, m.toString());
+										nuevaExp.lstVerd = CuadTable.merge(e1.lstVerd, e2.lstVerd);
+										nuevaExp.lstFals = e2.lstFals;
+										RESULT = nuevaExp;
 									}else{
 										MyToken tok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
 										parser.syntax_error(tok);
@@ -603,10 +578,23 @@ Expresion				::= Expresion:e1 Mas Expresion:e2 {:
 						|	Not Expresion:e {:
 								if (e != null){
 									RESULT = new Expresion(e.id, e.linea, e.columna, e.offset, "boolean");
+                                                                        RESULT.lstVerd = e.lstFals;
+                                                                        RESULT.lstFals = e.lstVerd;
 								}else{
 									RESULT = null;
 								}
 						:}
+                                                |       Termino:t1 operel:t Termino:t2{:
+                                                                if (t1 != null && t2 != null){
+                                                                        RESULT = new Expresion("", 0, 0, 0, "boolean");
+                                                                        RESULT.lstVerd = CuadTable.makeList(CuadTable.sigCuad);
+                                                                        RESULT.lstFals = CuadTable.makeList(CuadTable.sigCuad+1);
+                                                                        CuadTable.gen("if"+t.toString(),t1.id,t2.id,"");
+                                                                        CuadTable.gen("goto","");
+								}else{
+									RESULT = null;
+								} 
+                                                                              :}
 						|	Negativo Expresion:e {:
 								if (e != null){
 									if (e.tipo.equalsIgnoreCase("integer")){
@@ -682,9 +670,12 @@ Operador				::= Mas
 
 /* Estructuras */
 
-ForLoop					::= For Id Igual Expresion To Expresion {:
+ForLoop					::= For Id Igual Expresion:e1 To Expresion:e2 {:
 								MyToken forTok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-5);
-								SymTable.createSubScope("For" + SymTable.blockName(), forTok.left, forTok.right, forTok.offset); 	
+                                                                MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-4);
+								SymTable.createSubScope("For" + SymTable.blockName(), forTok.left, forTok.right, forTok.offset);
+                                                                CuadTable.gen("=",e1.lugar,myid.toString());
+                                                                CuadTable.gen("_etiq",e1.lugar,myid.toString());
 						:} Block {:
 								SymTable.endScope();
 						:} Next Id;
@@ -699,29 +690,30 @@ DoWhile					::= Do While Expresion {:
 IfStmt					::= If Expresion:e Then {:
 								MyToken ifTok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
 								SymTable.createSubScope("If" + SymTable.blockName(), ifTok.left, ifTok.right, ifTok.offset); 
-						:} LineEnd M:m1 Block N:n {: 
-								SymTable.endScope();
-								//CuadTable.backpatch(e.lstVerd, m1);
+						:} LineEnd M:m1 Block:b{:
+                                                                //CuadTable.backpatch(e.lstVerd, m1.toString());
+                                                                //RESULT = CuadTable.merge(e.lstFals,b.lstSig);
+                                                :} N:n {: SymTable.endScope();
 						:} ElseIfs:elseIfs ElseOpt:elseOpt End If M:m2 {:
 								//Statement s = new Statement("", 0, 0, 0, "", "");
 								//s.lstSig = CuadTable.merge(e.lstFals, block.lstSig);
 								//parser.msg("generando if=");
 								//CuadTable.gen("if=", e.lugar, "1", m.toString());
-								CuadTable.backpatch(e.lstVerd, m1);
-								CuadTable.backpatch(n, m2);
+								//CuadTable.backpatch(e.lstVerd, m1);
+								//CuadTable.backpatch(n, m2);
 								
 								if (elseIfs != null) {
-									CuadTable.backpatch(e.lstFals, elseIfs.lugar);
-									CuadTable.backpatch(elseIfs.lstSig, m2);
+									//CuadTable.backpatch(e.lstFals, elseIfs.lugar);
+									//CuadTable.backpatch(elseIfs.lstSig, m2);
 									if (elseOpt != null){
-										CuadTable.backpatch(elseIfs.lstFals, elseOpt);
+										//CuadTable.backpatch(elseIfs.lstFals, elseOpt);
 									}else{
-										CuadTable.backpatch(elseIfs.lstFals, m2);
+										//CuadTable.backpatch(elseIfs.lstFals, m2);
 									}
 								}else if (elseOpt != null){
-									CuadTable.backpatch(e.lstFals, elseOpt);
+									//CuadTable.backpatch(e.lstFals, elseOpt);
 								}else{
-									CuadTable.backpatch(e.lstFals, m2);
+									//CuadTable.backpatch(e.lstFals, m2);
 								}
 						:};
 

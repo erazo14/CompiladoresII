@@ -24,17 +24,24 @@ public class Cuadruplo {
     }
     
     Cuadruplo(String operator, String operand1, String dest){
-		this.operator = operator;
+        this.operator = operator;
         this.operand1 = operand1;
-		this.operand2 = null;
+        this.operand2 = "";
         this.dest = dest;
     }
     
     Cuadruplo(String operator, String operand1){
-		this.operator = operator;
+        this.operator = operator;
         this.operand1 = operand1;
-		this.operand2 = null;
-		this.dest = null;
+        this.operand2 = "";
+        this.dest = "";
+    }
+    
+    Cuadruplo(String operator){
+        this.operator = operator;
+        this.operand1 = "";
+        this.operand2 = "";
+        this.dest = "";
     }
     
 	@Override
@@ -55,7 +62,7 @@ public class Cuadruplo {
 			case "if":
 				return "if " + this.operand1 + " = 1 goto " + this.dest;
 			case "goto": 
-				return "goto " + this.operand1;
+				return "goto " + this.dest;
 			default:
 				return this.operator + ", " + this.operand1 + ", " + this.operand2 + ", " + this.dest;
 		}
