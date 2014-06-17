@@ -54,9 +54,9 @@ public class CodigoFinal {
         int t;
         String temp,temp2,temp3;
         Scope s;
-            for(Cuadruplo quad :)
+            for(Cuadruplo quad : Cuadruplos.cuadruplos){
         
-        
+                }
         
         
         
