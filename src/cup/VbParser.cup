@@ -189,7 +189,7 @@ non terminal		Asignacion, Operador;
 
 non terminal		Expresion Expresion;
 
-non terminal		ForLoop, DoWhile; 
+non terminal		Simbolo ForLoop, DoWhile; 
 
 non terminal            IfStmt;
 
@@ -235,7 +235,7 @@ ProgStart				::= Root;
 
 /* ROOT */
 
-Root					::= RootStmts | /* lambda */;
+Root					::= LineEnd RootStmts| RootStmts | /* lambda */;
 
 RootStmts				::= RootStmt
 						|	RootStmts RootStmt;
@@ -315,7 +315,7 @@ FuncDecl				::= Function Id {:
 						:}End Function;
 
 TypeDecl				::= Type Id:id LineEnd {: 
-								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
 								TypeStruct t = new TypeStruct(myid.value.toString(), myid.left, myid.right, myid.offset);
 								SymTable.curTypeStruct = t;
 								SymTable.curScope.addTypeStruct(t);
@@ -323,13 +323,13 @@ TypeDecl				::= Type Id:id LineEnd {:
 								SymTable.curTypeStruct = null;
 						:};
 
-TypeBlock				::= TypeBlockStmts;
+TypeBlock				::= TypeBlockStmts| /* lambda*/;
 
-TypeBlockStmts			::= TypeVarDecl
-						|	TypeBlockStmts LineEnd TypeVarDecl;
+TypeBlockStmts			::= TypeVarDecl LineEnd
+						|	TypeBlockStmts TypeVarDecl;
 
-TypeVarDecl				::= Id As Tipo:tipo {:
-								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-3);
+TypeVarDecl				::= Id As Tipo:tipo{:
+								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
 
 								if (SymTable.curTypeStruct.hasProp(myid.value.toString())){
 									parser.syntax_error(myid);
@@ -670,15 +670,26 @@ Operador				::= Mas
 
 /* Estructuras */
 
-ForLoop					::= For Id Igual Expresion:e1 To Expresion:e2 {:
-								MyToken forTok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-5);
-                                                                MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-4);
-								SymTable.createSubScope("For" + SymTable.blockName(), forTok.left, forTok.right, forTok.offset);
-                                                                CuadTable.gen("=",e1.lugar,myid.toString());
-                                                                CuadTable.gen("_etiq",e1.lugar,myid.toString());
-						:} Block {:
+ForLoop					::= For Id Igual Expresion:e1 M:m1 To Expresion:e2 M:m2 LineEnd {:
+								MyToken forTok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-8);
+                                                                MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-7);
+                                                                SymTable.createSubScope("For" + SymTable.blockName(), forTok.left, forTok.right, forTok.offset);
+                                                                CuadTable.gen("=",e1.lugar,myid.value.toString());
+                                                                CuadTable.gen("_etiq",e1.lugar,myid.value.toString());
+                                                                CuadTable.gen("if>",e1.lugar,e2.lugar,m2+4 + "");
+                                                                CuadTable.gen("goto","");
+                                                                CuadTable.backpatch(n,CuadTable.sigCuad);
+						:} Block Next Id {:
 								SymTable.endScope();
-						:} Next Id;
+                                                                String temp = CuadTable.newTemp();
+                                                                Simbolo nuevo = new Simbolo("",0,0,0,"");
+                                                                MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+                                                                CuadTable.gen("+",myid.value.toString(),1+"",temp);
+                                                                CuadTable.gen("=",temp,myid.value.toString());
+                                                                nuevo.lstSig = CuadTable.makeList(CuadTable.sigCuad);
+                                                                RESULT = nuevo;
+                                                                CuadTable.gen("goto",m2+1+"");
+                                                :};
 
 DoWhile					::= Do While Expresion {:
 								MyToken doTok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);

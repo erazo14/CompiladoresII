@@ -63,6 +63,14 @@ public class Cuadruplo {
 				return "if " + this.operand1 + " = 1 goto " + this.dest;
 			case "goto": 
 				return "goto " + this.dest;
+                        case "if>":
+				return "if " + this.operand1 + " > " + this.operand2 + " goto " + this.dest;
+                        case "if<=":
+				return "if " + this.operand1 + " <= " + this.operand2 + " goto " + this.dest;
+                        case "if>=":
+				return "if " + this.operand1 + " >= " + this.operand2 + " goto " + this.dest;
+                        case "_etiq":
+                            return this.operator + ": ";
 			default:
 				return this.operator + ", " + this.operand1 + ", " + this.operand2 + ", " + this.dest;
 		}
