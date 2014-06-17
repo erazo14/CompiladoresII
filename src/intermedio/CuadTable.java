@@ -9,6 +9,7 @@ package intermedio;
 import java.util.ArrayList;
 import java.util.Stack;
 import symtable.Scope;
+import symtable.Simbolo;
 import symtable.SymTable;
 
 /**
@@ -21,8 +22,10 @@ public final class CuadTable {
 	private static Integer tempSequence = 1;
         private static Integer etiqSequence = 1;
         SymTable Tabla;
-        CuadTable Cuadruplos1;
-        Scope AmbitoActual;
+        Cuadruplo cuad;
+        Simbolo SimboloActual;
+      //  CuadTable Cuadruplos1;
+      //  Scope AmbitoActual;
         ArrayList<Texto> mensajes;
         Lista_Temporales temporales;
         //CuadTable tempo; // maneja la lista de los temporales
@@ -32,7 +35,7 @@ public final class CuadTable {
     
 	public CuadTable(SymTable Tabla, /*CuadTable Cuadruplos,*/ ArrayList<Texto> mensajes) {
         this.Tabla = Tabla;
-        this.Cuadruplos1 = Cuadruplos1;
+      //  this.Cuadruplos1 = Cuadruplos1;
         //this.AmbitoActual = SymTable.rootScope; //las clases estan static por eso no puedo depender de ellas
         this.mensajes = mensajes;
         this.temporales = new Lista_Temporales();
@@ -150,10 +153,16 @@ public final class CuadTable {
         int tipo;
         int dir = 0;
         int t;
-        String temp,temp2,temp3;
+        String temp1;
+        String temp2;
+        String temp3;
         Scope s;
+           
            for (int i = 0; i < CuadTable.cuadruplos.size(); i++){
-			
+			switch(cuad.operator){
+                        
+                            
+                        }
 		}  
     }
 
