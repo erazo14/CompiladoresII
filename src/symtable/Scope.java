@@ -54,7 +54,8 @@ public class Scope {
 			return this.padre.hasVar(id);
 		}
 	}
-	
+	// buscar
+        
 	public Variable findVar(String id){
 		for (Variable v:this.variables){
 			if (v.id.equalsIgnoreCase(id)){
@@ -120,6 +121,7 @@ public class Scope {
 			return this.padre.findFunc(id);
 		}
 	}
+        
 	
 	public void addFunc(Funcion func){
 		this.funciones.add(func);
@@ -198,6 +200,8 @@ public class Scope {
 	public String ubicacion(){
 		return "lin " + this.linea + ", col " + this.columna + ", offset " + this.offset;
 	}
+        
+        
 	@Override
 	public String toString(){
 		String out = "";

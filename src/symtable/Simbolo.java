@@ -46,4 +46,4 @@ public class Simbolo {
 		this.lstFals = new ArrayList<>();
 		this.lstSig = new ArrayList<>();
 	}
-}
+}   
