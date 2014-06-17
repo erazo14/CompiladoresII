@@ -24,6 +24,7 @@ public final class CuadTable {
         SymTable Tabla;
         Cuadruplo cuad;
         Simbolo SimboloActual;
+        Lista_Temporales t = new Lista_Temporales();
       //  CuadTable Cuadruplos1;
       //  Scope AmbitoActual;
         ArrayList<Texto> mensajes;
@@ -160,7 +161,22 @@ public final class CuadTable {
            
            for (int i = 0; i < CuadTable.cuadruplos.size(); i++){
 			switch(cuad.operator){
-                        
+                        case "+":
+                                
+                                escribe.add("add" + cuad.dest + "," + cuad.operand1 + "," + cuad.operand2 );
+                                break;
+			case "-":
+                                escribe.add("sub" + cuad.dest + "," + cuad.operand1 + "," + cuad.operand2);
+                                break;
+			case "*":
+                                escribe.add("mul" + cuad.dest + "," + cuad.operand1 + "," + cuad.operand2);
+                                break;
+			case "/":
+                                escribe.add("div" + cuad.dest + "," + cuad.operand1 + "," + cuad.operand2);
+				break;
+                        case "goto": 
+                                 escribe.add("b "+ CuadTable.cuadruplos.get(Integer.parseInt(cuad.dest)).operator);
+                                 break;
                             
                         }
 		}  
