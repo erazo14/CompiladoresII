@@ -18,7 +18,7 @@ import symtable.SymTable;
  */
 public class CodigoFinal {
     SymTable Tabla;
-    //CuadTable Cuadruplos;
+    CuadTable Cuadruplos;
     Scope AmbitoActual;
     ArrayList<Texto> mensajes;
     //CuadTable tempo; // maneja la lista de los temporales
@@ -28,7 +28,7 @@ public class CodigoFinal {
 
     public CodigoFinal(SymTable Tabla, /*CuadTable Cuadruplos,*/ ArrayList<Texto> mensajes) {
         this.Tabla = Tabla;
-        //this.Cuadruplos = Cuadruplos;
+        this.Cuadruplos = Cuadruplos;
         this.AmbitoActual = SymTable.rootScope; //las clases estan static por eso no puedo depender de ellas
         this.mensajes = mensajes;
         //tempo = new CuadTable();
@@ -53,7 +53,10 @@ public class CodigoFinal {
         int dir = 0;
         int t;
         String temp,temp2,temp3;
-        Simbolo s;
+        Scope s;
+            for(Cuadruplo quad :)
+        
+        
         
         
         
