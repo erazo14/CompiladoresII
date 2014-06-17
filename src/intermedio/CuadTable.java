@@ -22,22 +22,23 @@ public final class CuadTable {
         private static Integer etiqSequence = 1;
         SymTable Tabla;
         CuadTable Cuadruplos1;
-       // Scope AmbitoActual;
+        Scope AmbitoActual;
         ArrayList<Texto> mensajes;
+        Lista_Temporales temporales;
         //CuadTable tempo; // maneja la lista de los temporales
         int cont_copia_string;
         Stack<ArrayList<String>> tempActivas;
         ArrayList<String> escribe;
-	
+    
 	public CuadTable(SymTable Tabla, /*CuadTable Cuadruplos,*/ ArrayList<Texto> mensajes) {
         this.Tabla = Tabla;
         this.Cuadruplos1 = Cuadruplos1;
-      //  this.AmbitoActual = SymTable.rootScope; //las clases estan static por eso no puedo depender de ellas
+        //this.AmbitoActual = SymTable.rootScope; //las clases estan static por eso no puedo depender de ellas
         this.mensajes = mensajes;
-        //tempo = new CuadTable();
+        this.temporales = new Lista_Temporales();
         this.cont_copia_string = 0;
-        tempActivas = new Stack();
-        escribe = new ArrayList();
+        this.tempActivas = new Stack();
+        this.escribe = new ArrayList();
     		
 	}
 	
@@ -151,9 +152,9 @@ public final class CuadTable {
         int t;
         String temp,temp2,temp3;
         Scope s;
-      /*     for (int i = 0; i < CuadTable.cuadruplos.size(); i++){
-		switch (){	
-		}    */    
+           for (int i = 0; i < CuadTable.cuadruplos.size(); i++){
+			
+		}  
     }
 
 }
