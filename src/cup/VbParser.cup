@@ -161,7 +161,7 @@ terminal			IntLiteral, StrLiteral;
 
 
 
-non terminal		Integer M;
+non terminal		Integer M, E;
 
 non terminal		ArrayList<Integer> N;
 
@@ -676,7 +676,7 @@ ForLoop					::= For Id Igual Expresion:e1 M:m1 To Expresion:e2 M:m2 LineEnd {:
                                                                 SymTable.createSubScope("For" + SymTable.blockName(), forTok.left, forTok.right, forTok.offset);
                                                                 CuadTable.gen("=",e1.lugar,myid.value.toString());
                                                                 CuadTable.gen("_etiq",e1.lugar,myid.value.toString());
-                                                                CuadTable.gen("if>",e1.lugar,e2.lugar,m2+4 + "");
+                                                                CuadTable.gen("if<",e1.lugar,e2.lugar,m2+4 + "");
                                                                 CuadTable.gen("goto","");
                                                                 CuadTable.backpatch(n,CuadTable.sigCuad);
 						:} Block Next Id {:
@@ -687,15 +687,27 @@ ForLoop					::= For Id Igual Expresion:e1 M:m1 To Expresion:e2 M:m2 LineEnd {:
                                                                 CuadTable.gen("+",myid.value.toString(),1+"",temp);
                                                                 CuadTable.gen("=",temp,myid.value.toString());
                                                                 nuevo.lstSig = CuadTable.makeList(CuadTable.sigCuad);
+                                                                System.out.pritnln("****************************"+nuevo.lstSig);
+                                                                Integer puesto = m2+1;
+                                                                //System.out.println("*******************"+puesto);
+                                                                //CuadTable.gen("goto",m2.toString());
                                                                 RESULT = nuevo;
-                                                                CuadTable.gen("goto",m2+1+"");
-                                                :};
+                                                :}N:n{:CuadTable.backpatch(n,m2+1+"");:};
 
-DoWhile					::= Do While Expresion {:
-								MyToken doTok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
-								SymTable.createSubScope("Do" + SymTable.blockName(), doTok.left, doTok.right, doTok.offset); 	
-						:} Block {:
+DoWhile					::= Do While E:et1 Expresion:e1 LineEnd E:et2{:
+                                                                Simbolo nuevo = new Simbolo("",0,0,0,"");
+								MyToken doTok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-4);
+								SymTable.createSubScope("Do" + SymTable.blockName(), doTok.left, doTok.right, doTok.offset);
+                                                                CuadTable.backpatch(e1.lstVerd,et2.toString());
+                                                                nuevo.lstSig = e1.lstFals;
+                                                                
+                                                                RESULT = nuevo;
+						:} Block:b N:n{:
 								SymTable.endScope();
+                                                                CuadTable.backpatch(n,et1.toString());
+                                                                CuadTable.gen("hola");
+                                                               // if(b.lstSig != null)
+                                                                 //   CuadTable.backpatch(b.lstSig,et1.toString());
 						:} Loop;
 
 IfStmt					::= If Expresion:e Then {:
@@ -808,6 +820,9 @@ PassMech				::= ByVal:byVal {: RESULT = byVal.toString().toLowerCase(); :}
 
 
 /* Cositas... */
+
+E						::= {: RESULT = CuadTable.sigCuad;
+                                                       CuadTable.gen("_etiq"); :};
 
 M						::= {: RESULT = CuadTable.sigCuad; :};
 

@@ -72,7 +72,7 @@ public class Cuadruplo {
                         case "_etiq":
                             return this.operator + ": ";
 			default:
-				return this.operator + ", " + this.operand1 + ", " + this.operand2 + ", " + this.dest;
+				return this.operator + ":";
 		}
 	}
 }
