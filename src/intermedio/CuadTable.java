@@ -21,31 +21,12 @@ public final class CuadTable {
 	public static Integer sigCuad = 0;
 	private static Integer tempSequence = 1;
         private static Integer etiqSequence = 1;
-        SymTable Tabla;
-        Cuadruplo cuad;
-        Simbolo SimboloActual;
-        Lista_Temporales t = new Lista_Temporales();
-      //  CuadTable Cuadruplos1;
-      //  Scope AmbitoActual;
-        ArrayList<Texto> mensajes;
-        Lista_Temporales temporales;
-        //CuadTable tempo; // maneja la lista de los temporales
-        int cont_copia_string;
-        Stack<ArrayList<String>> tempActivas;
-        ArrayList<String> escribe;
-    
-	public CuadTable(SymTable Tabla, /*CuadTable Cuadruplos,*/ ArrayList<Texto> mensajes) {
-        this.Tabla = Tabla;
-      //  this.Cuadruplos1 = Cuadruplos1;
-        //this.AmbitoActual = SymTable.rootScope; //las clases estan static por eso no puedo depender de ellas
-        this.mensajes = mensajes;
-        this.temporales = new Lista_Temporales();
-        this.cont_copia_string = 0;
-        this.tempActivas = new Stack();
-        this.escribe = new ArrayList();
-    		
-	}
-	
+        
+        public CuadTable(){
+        //algo
+        }
+        
+   
 	public static String newTemp(){
 		return "t" + CuadTable.tempSequence++;
 	}
@@ -138,48 +119,4 @@ public final class CuadTable {
 		
 		return buffer;
 	}
-        
-        public void FinalCode(){
-        escribe.add(".data");
-       // escribe.add("_true: .asciiz \"TRUE\" ");
-      // escribe.add("_false: .asciiz \"FALSE\" ");
-        for (Texto texto : mensajes) {
-            if(texto.texto.startsWith("'")){
-                texto.texto = texto.texto.replaceAll("'", "\"");
-            }
-            escribe.add(texto.nombre+": .asciiz "+texto.texto);
-        }
-        escribe.add(".text");
-        escribe.add(".globl main");
-        int tipo;
-        int dir = 0;
-        int t;
-        String temp1;
-        String temp2;
-        String temp3;
-        Scope s;
-           
-           for (int i = 0; i < CuadTable.cuadruplos.size(); i++){
-			switch(cuad.operator){
-                        case "+":
-                                
-                                escribe.add("add" + cuad.dest + "," + cuad.operand1 + "," + cuad.operand2 );
-                                break;
-			case "-":
-                                escribe.add("sub" + cuad.dest + "," + cuad.operand1 + "," + cuad.operand2);
-                                break;
-			case "*":
-                                escribe.add("mul" + cuad.dest + "," + cuad.operand1 + "," + cuad.operand2);
-                                break;
-			case "/":
-                                escribe.add("div" + cuad.dest + "," + cuad.operand1 + "," + cuad.operand2);
-				break;
-                        case "goto": 
-                                 escribe.add("b "+ CuadTable.cuadruplos.get(Integer.parseInt(cuad.dest)).operator);
-                                 break;
-                            
-                        }
-		}  
-    }
-
 }
