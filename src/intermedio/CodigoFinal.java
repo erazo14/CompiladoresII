@@ -116,9 +116,37 @@ public class CodigoFinal {
                         case "goto": 
                                  escribe.add("b "+ CuadTable.cuadruplos.get(Integer.parseInt(cuad.dest)).operator);
                                  break;
+                        case "if <":
+                                if(istempf(cuad.operand1)){
+                                    escribe.add("blt" + cuad.operand1 + "," + cuad.operand2 + "," + cuad.dest);
+                                }
+                                temporales.TemporalLibre(cuad.operand1);
+                                temporales.TemporalLibre(cuad.operand2);
+                                break;
+                        case "if >":
+                                 if(istempf(cuad.operand1)){
+                                    escribe.add("bgt" + cuad.operand1 + "," + cuad.operand2 + "," + cuad.dest);
+                                }
+                                temporales.TemporalLibre(cuad.operand1);
+                                temporales.TemporalLibre(cuad.operand2);
+                                break;
+                        case "if <=":
+                                if(istempf(cuad.operand1)){
+                                    escribe.add("ble" + cuad.operand1 + "," + cuad.operand2 + "," + cuad.dest);
+                                }
+                                temporales.TemporalLibre(cuad.operand1);
+                                temporales.TemporalLibre(cuad.operand2);
+                                break;
+                        case "if >=":
+                                if(istempf(cuad.operand1)){
+                                    escribe.add("bge" + cuad.operand1 + "," + cuad.operand2 + "," + cuad.dest);
+                                }
+                                temporales.TemporalLibre(cuad.operand1);
+                                temporales.TemporalLibre(cuad.operand2);
+                                break;
                         case "if =":
                             if(istempf(cuad.operand1)){
-                                escribe.add("s.eq.c" + cuad.operand1 + "," + cuad.operand2);
+                                escribe.add("beq" + cuad.operand1 + "," + cuad.operand2);
                                 }else{
                                     if(cuad.operand2.equalsIgnoreCase("true")){
                                         escribe.add("beq" + cuad.operand1 + ", 1 ," + cuad.dest);
@@ -129,6 +157,30 @@ public class CodigoFinal {
                                 temporales.TemporalLibre(cuad.operand1);
                                 temporales.TemporalLibre(cuad.operand2);                  
                                 break;
+                        case "if": //nose cual usar aqui
+                            if(istempf(cuad.operand1)){
+                                escribe.add("nose que va aqui" + cuad.operand1 + "," + cuad.dest);
+                                }
+                                    temporales.TemporalLibre(cuad.operand1);
+                                    temporales.TemporalLibre(cuad.dest);
+                                break;
+                        case"if !=":
+                                if(istempf(cuad.operand1)){
+                                    escribe.add("bne" + cuad.operand1 + "," + cuad.operand2 + "," + cuad.dest);
+                                }
+                                    temporales.TemporalLibre(cuad.operand1);
+                                    temporales.TemporalLibre(cuad.operand2);
+                                break;
+                        case "_etiq":
+                                
+                                break;
+                        case "Call":                           
+                          //      s = SimboloActual.findVar(cuad.dest); // esta cosa me esta cayendo mal
+                                escribe.add("jal nombredelafuncion" + s.nombre);
+                                            
+                    
+                        
+                    break;
                         }
 		}  
     }
@@ -141,7 +193,7 @@ public class CodigoFinal {
         }
     }
     
-    public boolean istempf(String s){
+    public boolean istempf(String s){ 
         if(s.startsWith("$f")){
             return true;
         }else{
@@ -150,7 +202,7 @@ public class CodigoFinal {
     }
     
      public boolean istemps(String s){
-        if(s.startsWith("%s")){
+        if(s.startsWith("$s")){
             return true;
         }else{
             return false;
