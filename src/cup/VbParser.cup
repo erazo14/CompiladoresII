@@ -252,8 +252,8 @@ RootStmt				::= VarDecl LineEnd
 						|	FuncDecl LineEnd
 						|	TypeDecl LineEnd;
 
-Consola                                 ::= Write Id {:
-                                                        MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+Consola                                 ::= Write ParI Id ParD{:
+                                                        MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
                                                         Variable input;
                                                         input = SymTable.curScope.findVar(myid.value.toString());
                                                         if(input != null){
@@ -263,7 +263,25 @@ Consola                                 ::= Write Id {:
                                                             parser.appendErr("La variable \"" + myid.value.toString() + "\" no ha sido declarada"); 
                                                         }
                                                     :}
-                                                |       Read Termino;
+                                                |       Read ParI Termino ParD {:MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
+                                                        Variable input;
+                                                        input = SymTable.curScope.findVar(myid.value.toString());
+                                                        if(input != null){
+                                                            CuadTable.gen("read",input.tipo,input.id);
+                                                        }else{
+                                                                Funcion f = SymTable.curScope.findFunc(myid.value.toString());
+                                                                Sub s = SymTable.curScope.findSub(myid.value.toString());
+								if(s != null ){
+                                                                    parser.syntax_error(myid);
+                                                                    parser.appendErr("La llamada al metodo: \"" + myid.value.toString() + "\" es de tipo void.");
+                                                                }
+                                                                if (f != null){
+                                                                    CuadTable.gen("read",f.tipo,f.id);
+                                                                }else{
+                                                                    
+                                                                }
+                                                        }
+                                                        :};
 
 VarDecl					::= Dim Id As Tipo:tipo {: 
 								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
