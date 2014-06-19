@@ -26,7 +26,8 @@ public class CodigoFinal {
     //  CuadTable Cuadruplos1;
     static Scope SimboloActual;
     static ArrayList<Texto> mensajes;
-    static Lista_Temporales temporales;
+    static Lista_Temporales temporales = new Lista_Temporales();
+    static String temporal;
     //CuadTable tempo; // maneja la lista de los temporales
     static int cont_copia_string;
     static Stack<ArrayList<String>> TempActivas;
@@ -65,6 +66,7 @@ public class CodigoFinal {
         String temp1;
         String temp2;
         String temp3;
+        String temp4;
         String convertir = String.valueOf(Tipo.Char);
         Scope s = null;
 
@@ -72,116 +74,414 @@ public class CodigoFinal {
             System.out.println(i + "...." + CuadTable.cuadruplos.get(i).operator);
             switch (CuadTable.cuadruplos.get(i).operator) {
                 case "+":
-                    //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
+                    temporales = new Lista_Temporales();
+                    if(istempf(CuadTable.cuadruplos.get(i).operand1)){
                     escribe.add("add" + CuadTable.cuadruplos.get(i).dest + "," + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2);
                     tipo = Tipo.Int;
-                                //}
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
-                    //temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
+                                }
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
+                    temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
                     break;
                 case "-":
-                    //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
+                    temporales = new Lista_Temporales();
+                    if(istempf(CuadTable.cuadruplos.get(i).operand1)){
                     escribe.add("sub" + CuadTable.cuadruplos.get(i).dest + "," + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2);
                     tipo = Tipo.Int;
-                                //}
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
-                    //temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
+                                }
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
+                    temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
 
                     break;
                 case "*":
-                    //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
+                    temporales = new Lista_Temporales();
+                    if(istempf(CuadTable.cuadruplos.get(i).operand1)){
                     escribe.add("mul" + CuadTable.cuadruplos.get(i).dest + "," + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2);
                     tipo = Tipo.Int;
-//                                }
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
-                    //temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo false);
+                                }
+                   temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
+                   temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
                     break;
                 case "/":
-                    //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
+                    temporales = new Lista_Temporales();
+                    if(istempf(CuadTable.cuadruplos.get(i).operand1)){
                     escribe.add("div" + CuadTable.cuadruplos.get(i).dest + "," + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2);
                     tipo = Tipo.Int;
-  //                              }
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
-                    //temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
+                                }
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
+                    temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
                     break;
                 case "Not":
+                    temporales = new Lista_Temporales();
                     //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
                     escribe.add("Neg" + CuadTable.cuadruplos.get(i).dest + "," + CuadTable.cuadruplos.get(i).operand1);
                     tipo = Tipo.Int;
   //                              }
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
-                    //temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                    temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
                     break;
-                case "=": /*
-                     if(!(istempf(CuadTable.cuadruplos.get(i).dest))){
-                     // creo que es medio fumado, ya que tiene que ver que es lo que iguala, nose si estoy equivada
-                     if(istemp(CuadTable.cuadruplos.get(i).dest)){
-                     if(isint(CuadTable.cuadruplos.get(i).operand1)){
-                     tipo = Tipo.Int;
-                     escribe.add("li"  + CuadTable.cuadruplos.get(i).dest + "," + CuadTable.cuadruplos.get(i).operand1);
-                     temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
-                     }else{
-                     if(isid(CuadTable.cuadruplos.get(i).operand1)){
-                     // s = SimboloActual.findLocalVar(CuadTable.cuadruplos.get(i).operand1);
-                     tipo = s.getTipo();
-                     switch(tipo){/*
-                     case Tipo.int:
-                     if(s.Saltos != 0){
-                     dir = s.direccion + 4;
-                     escribe.add("lw "+CuadTable.cuadruplos.get(i).dest + " , -"+dir+"($fp)");
-                     temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo false);
-                     } **
-                                               
-                                               
-                     }
-                                          
-                     }
-                                   
-                     }
-                     }
-                     } */
+                case "=": 
+                    temporales = new Lista_Temporales();
+                    /*
+                     // creo que es medio fumado, ya que tiene que ver que es lo que iguala, nose si estoy equivocada
+                    if(istempf(CuadTable.cuadruplos.get(i).dest)){
+                            if(isint(CuadTable.cuadruplos.get(i).operand1)){
+                                tipo = Tipo.Int;
+                                escribe.add("li "+CuadTable.cuadruplos.get(i).dest+" , "+CuadTable.cuadruplos.get(i).operand1);
+                                temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
+                            }else{
+                                if(isid(CuadTable.cuadruplos.get(i).operand1)){
+                                    s = SimboloActual.findVar1(CuadTable.cuadruplos.get(i).operand1);
+                                    tipo = s.getTipo();
+                                    switch(tipo){
+                                        case Tipo.Int:
+                                            if(s.Saltos == 0){
+                                                if(!(s.Referencia)){                                                   
+                                                    dir = s.direccion + 4;
+                                                    escribe.add("lw "+CuadTable.cuadruplos.get(i).dest + " , -"+dir+"($fp)");
+                                                    temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
+                                                }
+                                            }else{
+                                                if(!(s.Referencia)){
+                                                    t = s.Saltos;
+                                                    temp1 = temporales.getSgteTemporal();
+                                                    temp2 = temporales.getSgteTemporal();
+                                                    escribe.add("lw "+temp1+" -12($fp)");
+                                                    t--;
+                                                    while(t!=0){
+                                                        escribe.add("move "+temp2+" , "+temp1);
+                                                        escribe.add("lw "+temp1+" , -12("+temp2+")");
+                                                        t--;
+                                                    }
+                                                    temporales.TemporalLibre(temp1);
+                                                    temporales.TemporalLibre(temp2);
+                                                    dir = s.direccion + 4;
+                                                    escribe.add("lw "+CuadTable.cuadruplos.get(i).dest+" , -"+dir+"("+temp1+")");
+                                                   temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
+                                                }
+                                            }
+                                            break;
+                                        case Tipo.Boolean:
+                                            if(s.Saltos == 0){
+                                                if(!(s.Referencia)){
+                                                    dir = s.direccion+ 2;
+                                                    escribe.add("lb "+CuadTable.cuadruplos.get(i).dest + " , -"+dir+"($fp)");
+                                                    temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
+                                                }
+                                            }else{
+                                                if(!(s.Referencia)){
+                                                    t = s.Saltos;
+                                                    temp1 =temporales.getSgteTemporal();
+                                                    temp2 =temporales.getSgteTemporal();
+                                                    escribe.add("lw "+temp1+" -12($fp)");
+                                                    t--;
+                                                    while(t!=0){
+                                                        escribe.add("move "+temp2+" , "+temp1);
+                                                        escribe.add("lw "+temp1+" , -12("+temp2+")");
+                                                        t--;
+                                                    }
+                                                    temporales.TemporalLibre(temp1);
+                                                    temporales.TemporalLibre(temp2);
+                                                    dir = s.direccion + 2;
+                                                    escribe.add("lb "+CuadTable.cuadruplos.get(i).dest+" , -"+dir+"("+temp1+")");
+                                                    temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
+                                                }
+                                            }
+                                            break;
+                                        case Tipo.Char:
+                                            if(s.Saltos == 0){
+                                                if(!(s.Referencia)){
+                                                    dir = s.direccion + 2;
+                                                    escribe.add("la "+CuadTable.cuadruplos.get(i).dest + " , -"+dir+"($fp)");
+                                                    temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
+                                                }
+                                            }else{
+                                                if(!(s.Referencia)){
+                                                    t = s.Saltos;
+                                                    temp1 = temporales.getSgteTemporal();
+                                                    temp2 = temporales.getSgteTemporal();
+                                                    escribe.add("lw "+temp1+" -12($fp)");
+                                                    t--;
+                                                    while(t!=0){
+                                                        escribe.add("move "+temp2+" , "+temp1);
+                                                        escribe.add("lw "+temp1+" , -12("+temp2+")");
+                                                        t--;
+                                                    }
+                                                    temporales.TemporalLibre(temp1);
+                                                    temporales.TemporalLibre(temp2);
+                                                    dir = s.direccion + 2;
+                                                    escribe.add("la "+CuadTable.cuadruplos.get(i).dest+" , -"+dir+"("+temp1+")");
+                                                    temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
+                                                }                                               
+                                            }
+                                            break;
+                                        case Tipo.String:
+                                            if(s.Saltos == 0){
+                                                if(!(s.Referencia)){
+                                                    dir = s.direccion+ 46;
+                                                    escribe.add("la "+CuadTable.cuadruplos.get(i).dest + " , -"+dir+"($fp)");
+                                                    temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
+                                                }
+                                            }else{
+                                                if(!(s.Referencia)){
+                                                    t = s.Saltos;
+                                                    temp1 = temporales.getSgteTemporal();
+                                                    temp2 = temporales.getSgteTemporal();
+                                                    escribe.add("lw "+temp1+" -12($fp)");
+                                                    t--;
+                                                    while(t!=0){
+                                                        escribe.add("move "+temp2+" , "+temp1);
+                                                        escribe.add("lw "+temp1+" , -12("+temp2+")");
+                                                        t--;
+                                                    }
+                                                    temporales.TemporalLibre(temp1);
+                                                    temporales.TemporalLibre(temp2);
+                                                    dir = s.direccion + 46;
+                                                    escribe.add("la "+CuadTable.cuadruplos.get(i).dest+" , -"+dir+"("+temp1+")");
+                                                    temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
+                                                }
+                                            }
+                                            break;
+                                    }
+                                }else{
+                                    t = CuadTable.cuadruplos.indexOf(CuadTable.cuadruplos);
+                                    temp1 = CuadTable.cuadruplos.get(t-1).dest;
+                                    s = SimboloActual.findVar1(temp1);
+                                    tipo = s.getTipo();
+                                    switch(tipo){
+                                        case Tipo.Int:
+                                            escribe.add("move "+CuadTable.cuadruplos.get(i).dest+" , $v0");
+                                            temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
+                                            break;
+                                        
+                                    }
+                                }
+                            }
+                        }else{
+                            s = SimboloActual.findVar1(CuadTable.cuadruplos.get(i).dest);
+                            if(s.Saltos == 0){
+                                tipo = s.getTipo();
+                                switch(tipo){
+                                    case Tipo.Int:
+                                        if(!(s.Referencia)){
+                                            if(!(temporales.is_ref(CuadTable.cuadruplos.get(i).operand1))){
+                                                dir = s.direccion + 4;
+                                                escribe.add("sw "+CuadTable.cuadruplos.get(i).operand1 + " , -" + dir +"($fp)");
+                                                temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                                            }
+                                        }
+                                        break;
+                                    case Tipo.Boolean:
+                                        if(!(s.Referencia)){
+                                            if(!(temporales.is_ref(CuadTable.cuadruplos.get(i).operand1))){
+                                                dir = s.direccion + 2;
+                                                temp1 = temporales.getSgteTemporal();
+                                                if(CuadTable.cuadruplos.get(i).operand1.equals("TRUE")){
+                                                    escribe.add("li "+temp1+" , 1");
+                                                }else{
+                                                    escribe.add("li "+temp1+" , 0");
+                                                }
+                                                escribe.add("sb "+temp1 + " , -" + dir +"($fp)");
+                                                temporales.TemporalLibre(temp1);
+                                            }
+                                        }
+                                        break;
+                                    case Tipo.Char:
+                                        if(!(s.Referencia)){
+                                            if(!(temporales.is_ref(CuadTable.cuadruplos.get(i).operand1))){
+                                                temp1 = temporales.getSgteTemporal();//dir origen
+                                                temp2 = temporales.getSgteTemporal();//char
+                                                temp3 = temporales.getSgteTemporal();//dir destino
+                                                dir = s.direccion + 2;
+                                                if(iscadena(CuadTable.cuadruplos.get(i).operand1)){
+                                                    escribe.add("la "+temp1 +" , "+CuadTable.cuadruplos.get(i).operand1+"");
+                                                }else{
+                                                    escribe.add("la "+temp1 +" , ("+CuadTable.cuadruplos.get(i).operand1+")");
+                                                }
+                                                escribe.add("la "+temp3+" , -"+dir+"($fp)");
+                                                escribe.add("_begin_copy"+cont_copia_string+":");
+                                                escribe.add("lb "+temp2 +" , ("+temp1+")");
+                                                escribe.add("sb "+temp2 +" , ("+temp3+")");
+                                                escribe.add("beq "+temp2+" , $zero , _end_copy"+cont_copia_string);
+                                                escribe.add("add "+temp1+" , "+temp1+" , 1");
+                                                escribe.add("add "+temp3+" , "+temp3+" , 1");
+                                                escribe.add("b _begin_copy"+cont_copia_string);
+                                                escribe.add("_end_copy"+cont_copia_string+":");
+                                                temporales.TemporalLibre(temp1);
+                                                temporales.TemporalLibre(temp2);
+                                                temporales.TemporalLibre(temp2);
+                                                cont_copia_string++;
+                                            }
+                                        }
+                                        break;
+                                    case Tipo.String:
+                                        if(!(s.Referencia)){
+                                            if(!(temporales.is_ref(CuadTable.cuadruplos.get(i).operand1))){
+                                                temp1 = temporales.getSgteTemporal();//dir origen
+                                                temp2 = temporales.getSgteTemporal();//char
+                                                temp3 = temporales.getSgteTemporal();//dir destino
+                                                dir = s.direccion + 46;
+                                                if(iscadena(CuadTable.cuadruplos.get(i).operand1)){
+                                                    escribe.add("la "+temp1 +" , "+CuadTable.cuadruplos.get(i).operand1+"");
+                                                }else{
+                                                    escribe.add("la "+temp1 +" , ("+CuadTable.cuadruplos.get(i).operand1+")");
+                                                }
+                                                escribe.add("la "+temp3+" , -"+dir+"($fp)");
+                                                escribe.add("_begin_copy"+cont_copia_string+":");
+                                                escribe.add("lb "+temp2 +" , ("+temp1+")");
+                                                escribe.add("sb "+temp2 +" , ("+temp3+")");
+                                                escribe.add("beq "+temp2+" , $zero , _end_copy"+cont_copia_string);
+                                                escribe.add("add "+temp1+" , "+temp1+" , 1");
+                                                escribe.add("add "+temp3+" , "+temp3+" , 1");
+                                                escribe.add("b _begin_copy"+cont_copia_string);
+                                                escribe.add("_end_copy"+cont_copia_string+":");
+                                                temporales.TemporalLibre(temp1);
+                                                temporales.TemporalLibre(temp2);
+                                                temporales.TemporalLibre(temp3);
+                                                cont_copia_string++;
+                                            }
+                                        }
+                                        break;
+                                }
+                                
+                               temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                            }else{
+                                tipo = s.getTipo();
+                                t = s.Saltos;
+                                temp1 = temporales.getSgteTemporal();
+                                temp2 = temporales.getSgteTemporal();
+                                escribe.add("lw "+temp1+" -12($fp)");
+                                t--;
+                                while(t!=0){
+                                    escribe.add("move "+temp2+" , "+temp1);
+                                    escribe.add("lw "+temp1+" , -12("+temp2+")");
+                                    t--;
+                                }
+                                temporales.TemporalLibre(temp1);
+                                temporales.TemporalLibre(temp2);
+                                switch(tipo){
+                                    case Tipo.Int:
+                                        if(!(s.Referencia)){
+                                            dir = s.direccion + 4;
+                                            escribe.add("sw "+CuadTable.cuadruplos.get(i).operand1+" , -"+dir+"("+temp1+")");
+                                            temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                                            temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo, false);
+                                        }
+                                        break;
+                                    case Tipo.Boolean:
+                                        if(!(s.Referencia)){
+                                                dir = s.direccion + 2;
+                                                temp2 = temporales.getSgteTemporal();
+                                                if(CuadTable.cuadruplos.get(i).operand1.equals("TRUE")){
+                                                    escribe.add("li "+temp2+" , 1");
+                                                }else{
+                                                    escribe.add("li "+temp2+" , 0");
+                                                }
+                                                escribe.add("sb "+temp2 + " , -" + dir +"("+temp1+")");
+                                                temporales.TemporalLibre(temp2);
+                                        }
+                                        break;
+                                    case Tipo.Char:
+                                        if(!(s.Referencia)){
+                                                temp4 = temp1;
+                                                temp1 = temporales.getSgteTemporal();//dir origen
+                                                temp2 = temporales.getSgteTemporal();//char
+                                                temp3 = temporales.getSgteTemporal();//dir destino
+                                                dir = s.direccion + 2;
+                                                escribe.add("lw "+temp1 +" , "+CuadTable.cuadruplos.get(i).operand1);
+                                                escribe.add("la "+temp3+" , -"+dir+"("+temp4+")");
+                                                escribe.add("_begin_copy"+cont_copia_string+":");
+                                                escribe.add("lb "+temp2 +" , ("+temp1+")");
+                                                escribe.add("sb "+temp2 +" , ("+temp3+")");
+                                                escribe.add("beq "+temp2+" , $zero , _end_copy"+cont_copia_string);
+                                                escribe.add("add "+temp1+" , "+temp1+" , 1");
+                                                escribe.add("add "+temp3+" , "+temp3+" , 1");
+                                                escribe.add("b _begin_copy"+cont_copia_string);
+                                                escribe.add("_end_copy"+cont_copia_string+":");
+                                                temporales.TemporalLibre(temp1);
+                                                temporales.TemporalLibre(temp2);
+                                                temporales.TemporalLibre(temp2);
+                                                temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                                                cont_copia_string++;
+                                        }
+                                        break;
+                                    case Tipo.String:
+                                        if(!(s.Referencia)){
+                                            temp4 = temp1;
+                                                temp1 = temporales.getSgteTemporal();//dir origen
+                                                temp2 = temporales.getSgteTemporal();//char
+                                                temp3 = temporales.getSgteTemporal();//dir destino
+                                                dir = s.direccion + 46;
+                                                escribe.add("lw "+temp1 +" , "+CuadTable.cuadruplos.get(i).operand1);
+                                                escribe.add("la "+temp3+" , -"+dir+"("+temp4+")");
+                                                escribe.add("_begin_copy"+cont_copia_string+":");
+                                                escribe.add("lb "+temp2 +" , ("+temp1+")");
+                                                escribe.add("sb "+temp2 +" , ("+temp3+")");
+                                                escribe.add("beq "+temp2+" , $zero , _end_copy"+cont_copia_string);
+                                                escribe.add("add "+temp1+" , "+temp1+" , 1");
+                                                escribe.add("add "+temp3+" , "+temp3+" , 1");
+                                                escribe.add("b _begin_copy"+cont_copia_string);
+                                                escribe.add("_end_copy"+cont_copia_string+":");
+                                                temporales.TemporalLibre(temp1);
+                                                temporales.TemporalLibre(temp2);
+                                                temporales.TemporalLibre(temp3);
+                                                temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);                                                
+                                                cont_copia_string++;
+                                        }
+                                        break;
+                                }
+                                
+                            }
+                        }*/
+                    break;
 
-                    break;
-                case "goto": /*
+                    
+                case "goto":
+                    temporales = new Lista_Temporales();
+                    /*
                      String hola =CuadTable.cuadruplos.get(i).dest;
                      int juan =Integer.parseInt(hola);
                      System.out.println(juan);
-                     System.out.println("rrrrrrrrrrrrrrrrrr"+CuadTable.cuadruplos.get(juan).operator);
-                     //                                 escribe.add("b "+ CuadTable.cuadruplos.get(Integer.parseInt(CuadTable.cuadruplos.get(i).dest)).operator);
-                     */ break;
+                     System.out.println("rrrrrrrrrrrrrrrrrr"+CuadTable.cuadruplos.get(juan).operator);*/
+                    escribe.add("b "+ CuadTable.cuadruplos.get(Integer.parseInt(CuadTable.cuadruplos.get(i).dest)).operator);
+                     break;
                 case "if<":
+                    temporales = new Lista_Temporales();
                     //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
                     escribe.add("blt" + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2 + "," + CuadTable.cuadruplos.get(i).dest);
   //                              }
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
                     break;
                 case "if>":
+                    temporales = new Lista_Temporales();
                     //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
                     escribe.add("bgt" + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2 + "," + CuadTable.cuadruplos.get(i).dest);
   //                              }
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
                     break;
                 case "if<=":
+                    temporales = new Lista_Temporales();
                     //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
                     escribe.add("ble" + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2 + "," + CuadTable.cuadruplos.get(i).dest);
   //                              }
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
                     break;
                 case "if>=":
+                    temporales = new Lista_Temporales();
                     //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
                     escribe.add("bge" + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2 + "," + CuadTable.cuadruplos.get(i).dest);
   //                              }
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
                     break;
                 case "if=":
+                    temporales = new Lista_Temporales();
                     //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
                     escribe.add("beq" + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2);
   //                              }else{
@@ -191,55 +491,60 @@ public class CodigoFinal {
                     //                                                  escribe.add("beq" + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2 + "," + CuadTable.cuadruplos.get(i).dest);
                     //                                  }
                     //                          }
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);                  
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);                  
                     break;
                 case "if": //nose cual usar aqui
+                    temporales = new Lista_Temporales();
                     //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
                     escribe.add("b" + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).dest);
  //                               }
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).dest);
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).dest);
                     break;
                 case "if<>":
+                    temporales = new Lista_Temporales();
                     //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
                     escribe.add("bne" + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2 + "," + CuadTable.cuadruplos.get(i).dest);
   //                              }
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
-                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
                     break;
                 /*  case "_etiq": //dentro del default
                  escribe.add(CuadTable.cuadruplos.get(i).dest);
                                 
                  break;*/
                 case "call":
+                    temporales = new Lista_Temporales();
                     //    s = SimboloActual.findVar1(CuadTable.cuadruplos.get(i).dest);
                     s = SymTable.curScope.findVar1(CuadTable.cuadruplos.get(i).dest);// esta cosa me esta cayendo mal
-                    escribe.add("jal _func" + s.nombre);
-                    if (!TempActivas.empty()) {
-                        ArrayList<String> temps = TempActivas.pop();
-                        for (String temporales1 : temps) {
-                            if (istempf(temporales1)) {
-                                escribe.add("l.s " + temporales1 + " , ($sp)");
-                            } else {
-                                escribe.add("lw " + temporales1 + " , ($sp)");
-                            }
+                    escribe.add("jal __" + CuadTable.cuadruplos.get(i).dest);
+                   // if (!TempActivas.empty()) {
+//                        ArrayList<String> temps = TempActivas.pop();
+                  //      for (String temporales1 : temps) {
+                           // String temporales1 = null;
+                      //      if (!(istempf(temporales1))) {
+                                escribe.add("lw " + "$v0" + " , ($sp)");
+                       //     }
                             escribe.add("add $sp , $sp , 4");
-                        }
-                    }
+                       // }
+                   // }
                     break;
                 case "_main":
+                    temporales = new Lista_Temporales();
                     escribe.add("main:");
                     escribe.add("move $fp , $sp");
                     break;
                 case "_salida":
+                    temporales = new Lista_Temporales();
                     escribe.add("li $v0 , 10");
                     escribe.add("syscall");
                     SimboloActual = Tabla.getrootScope();
                     break;
                 case "read":
+                    temporales = new Lista_Temporales();
                     Scope sc = null;
-                    //     sc = SimboloActual.findVar(CuadTable.cuadruplos.get(i).dest);
+                    // revisar esto, nose si esta bien sc = SimboloActual.findVar1(CuadTable.cuadruplos.get(i).dest);
                     switch (CuadTable.cuadruplos.get(i).dest) {
                         case "integer":
                             escribe.add("li $v0 , 5");
@@ -335,6 +640,7 @@ public class CodigoFinal {
                     break;
 
                 case "write":
+                    temporales = new Lista_Temporales();
                         switch (CuadTable.cuadruplos.get(i).dest) {
 
                             case "string":
@@ -342,7 +648,7 @@ public class CodigoFinal {
                                     escribe.add("li $v0 , 8");
                                     escribe.add("move $a0 , _" + CuadTable.cuadruplos.get(i).operand1);
                                     escribe.add("syscall");
-  //                                  temporales.TemporalLibre(CuadTable.cuadruplos.get(i).dest);
+                                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).dest);
                                 //}
                                 break;
                             case "integer":
@@ -350,7 +656,7 @@ public class CodigoFinal {
                                     escribe.add("li $v0 , 5");
                                     escribe.add("move $a0 , _" + CuadTable.cuadruplos.get(i).operand1);
                                     escribe.add("syscall");
-//                                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).dest);
+                                   temporales.TemporalLibre(CuadTable.cuadruplos.get(i).dest);
                                 //}
                                 break;
 /*                            case "char":
@@ -375,7 +681,7 @@ public class CodigoFinal {
                     
                     break;
                 case "Saveparam":
-                    // dir = 12;
+                    temporales = new Lista_Temporales();
                     ArrayList<Temporal> activos = temporales.getTempActivos();
                     ;
                     t = CuadTable.cuadruplos.indexOf(CuadTable.cuadruplos) + 1;
@@ -397,15 +703,9 @@ public class CodigoFinal {
                     TempActivas.push(tempos_guardados);
                     break;
                 case "param":
+                    temporales = new Lista_Temporales();
                     if (!(istempf(CuadTable.cuadruplos.get(i).dest))) {
-                        /* if(!(temporales.is_ref(CuadTable.cuadruplos.get(i).dest))){
-                        
-                         }else{
-                         dir = dir + 4;
-                         escribe.add("s.s "+quad.resultado+" , -"+dir+"($sp)");
-                         tempos.free_temp(quad.resultado);
-                         }*
-                         }else{*/
+                      
                         if (istemp(CuadTable.cuadruplos.get(i).dest)) {
                             tipo = temporales.get_tipo(CuadTable.cuadruplos.get(i).dest);
                             switch (tipo) {
@@ -482,12 +782,15 @@ public class CodigoFinal {
                     }
                     break;
                 default:
+                    temporales = new Lista_Temporales();
                     // CuadTable.cuadruplos.add(new Cuadruplo("_"+CuadTable.cuadruplos.get(i).operator));
                     escribe.add("_" + CuadTable.cuadruplos.get(i).operator + ":");
                     break;
             }
 
         }
+        escribe.add("li $v0 , 10");
+        escribe.add("syscall");
         return escribe;
     }
 
@@ -507,6 +810,7 @@ public class CodigoFinal {
         }
     }
 
+    
     public static boolean istemps(String s) {
         if (s.startsWith("$s")) {
             return true;

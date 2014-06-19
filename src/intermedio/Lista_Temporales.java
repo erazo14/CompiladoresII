@@ -16,16 +16,16 @@ public class Lista_Temporales {
     public final static int NumTemporales = 10;
     public final static int NTemporalesS = 8;
     public final static int NTemporalesf = 14; //nose si dejarla para las 32 registros que se manejan
-    Temporal[] temporales;
+    Temporal[] temporal;
     Temporal[] temp_s;
     Temporal[] temp_f;
   
     public Lista_Temporales(){
-        temporales = new Temporal[NumTemporales];
+        temporal = new Temporal[NumTemporales];
         temp_s = new Temporal[NTemporalesS];
         temp_f = new Temporal[NTemporalesf];
         for (int i = 0; i < NumTemporales; i++) {
-            temporales[i] = new Temporal("$t"+i);
+            temporal[i] = new Temporal("$t"+i);
         }
         for (int i = 0; i < NTemporalesS; i++) {
             temp_s [i] = new Temporal("$s"+i);            
@@ -45,9 +45,9 @@ public class Lista_Temporales {
       public String getSgteTemporal(){
         String result = "";
         for (int i = 0; i < NumTemporales; i++) {
-            if(temporales[i].available){
-                result = temporales[i].name;
-                temporales[i].available = false;
+            if(temporal[i].available){
+                result = temporal[i].name;
+                temporal[i].available = false;
                 break;
             }
         }
@@ -80,32 +80,32 @@ public class Lista_Temporales {
         return result;
     }
     
-    public String TemporalLibre(String name){
+    public void TemporalLibre(String name){
         for (int i = 0; i < NumTemporales; i++) {
-            if(temporales[i].name.equalsIgnoreCase(name)){
-                temporales[i].available = true;
-                return name;
+            if(temporal[i].name.equalsIgnoreCase(name)){
+                temporal[i].available = true;
+                return;
             }
         }
         for (int i = 0; i < NTemporalesS; i++) {
             if(this.temp_s[i].name.equalsIgnoreCase(name)){
                 temp_s[i].available = true;
-                return name;
+                return;
             }
         }
         for (int i = 0; i < temp_f.length ; i++) {
             if(temp_f[i].name.equalsIgnoreCase(name)){
                 temp_f[i].available = true;
-                return name;
+                return;
             }
         }
-        return name;
+        return;
     }
     
     
     public boolean IsTemporal(String name){
         for (int i = 0; i < NumTemporales; i++) {
-            if(temporales[i].name.equalsIgnoreCase(name)){
+            if(temporal[i].name.equalsIgnoreCase(name)){
                 return true;
             }
         }
@@ -114,17 +114,17 @@ public class Lista_Temporales {
     
     public void TemporalenUso(String name, int tipo, boolean referencia){ // aqui creo que podria ir el tipo del valor del temporal, deberia de crear una clase tipo
         for (int i = 0; i < NumTemporales; i++) {
-            if(temporales[i].name.equalsIgnoreCase(name)){
-               temporales[i].tipo = tipo;
-               temporales[i].referencia = referencia;
-               temporales[i].available = false;
+            if(temporal[i].name.equalsIgnoreCase(name)){
+               temporal[i].tipo = tipo;
+               temporal[i].referencia = referencia;
+               temporal[i].available = false;
                 return;
             }
         }
         for (int i = 0; i < NTemporalesS; i++) {
             if(this.temp_s[i].name.equalsIgnoreCase(name)){
                 temp_s[i].tipo =tipo;
-                temporales[i].referencia = referencia;
+                temporal[i].referencia = referencia;
                 temp_s[i].available = false;
                 return;
             }
@@ -133,7 +133,7 @@ public class Lista_Temporales {
         for (int i = 0; i < temp_f.length ; i++) {
             if(temp_f[i].name.equalsIgnoreCase(name)){
                 temp_f[i].tipo = tipo;
-                temporales[i].referencia = referencia;
+                temporal[i].referencia = referencia;
                 temp_f[i].available = false;
                 return;
             }
@@ -142,8 +142,8 @@ public class Lista_Temporales {
     
     public void set_tipo (String name , int tipo){
         for (int i = 0; i < NumTemporales; i++) {
-            if(temporales[i].name.equalsIgnoreCase(name)){
-                temporales[i].tipo = tipo;
+            if(temporal[i].name.equalsIgnoreCase(name)){
+                temporal[i].tipo = tipo;
                 return;
             }
         }
@@ -163,8 +163,8 @@ public class Lista_Temporales {
     
     public int get_tipo(String name){
                 for (int i = 0; i < NumTemporales; i++) {
-            if(temporales[i].name.equalsIgnoreCase(name)){
-                return temporales[i].tipo;
+            if(temporal[i].name.equalsIgnoreCase(name)){
+                return temporal[i].tipo;
             }
         }
         for (int i = 0; i < NTemporalesS; i++) {
@@ -182,8 +182,8 @@ public class Lista_Temporales {
     
     public void set_ref (String name , boolean ref){
         for (int i = 0; i < NumTemporales; i++) {
-            if(temporales[i].name.equalsIgnoreCase(name)){
-                temporales[i].referencia = ref;
+            if(temporal[i].name.equalsIgnoreCase(name)){
+                temporal[i].referencia = ref;
                 return;
             }
         }
@@ -202,8 +202,8 @@ public class Lista_Temporales {
     }
     public boolean is_ref(String name){
                 for (int i = 0; i < NumTemporales; i++) {
-            if(temporales[i].name.equalsIgnoreCase(name)){
-                if(temporales[i].referencia){
+            if(temporal[i].name.equalsIgnoreCase(name)){
+                if(temporal[i].referencia){
                     return true;
                 }
                 else{
@@ -236,8 +236,8 @@ public class Lista_Temporales {
     public ArrayList<Temporal> getTempActivos(){
         ArrayList<Temporal> tempactivos = new ArrayList();
         for (int i = 0; i < NumTemporales; i++) {
-            if(!temporales[i].available){
-                tempactivos.add(temporales[i]);
+            if(!temporal[i].available){
+                tempactivos.add(temporal[i]);
             }
         }
         for (int i = 0; i < temp_f.length ; i++) {
