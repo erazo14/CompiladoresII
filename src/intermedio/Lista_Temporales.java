@@ -241,6 +241,7 @@ public class Lista_Temporales {
         }
         for (int i = 0; i < temp_f.length ; i++) {
             if(!temp_f[i].available){
+                System.out.println("kkkkkkkkkk"+i);
                 tempactivos.add(temp_f[i]);
             }
         }
