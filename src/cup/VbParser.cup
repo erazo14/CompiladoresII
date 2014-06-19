@@ -536,7 +536,7 @@ Expresion				::= Expresion:e1 Mas Expresion:e2 {:
 									}
 								}
 						:}
-						|   Expresion:e1 And M:m Expresion:e2 {:
+						|   Expresion:e1 And M:m E Expresion:e2 {:
 								if (e1 != null && e2 != null){
 									if (e1.tipo.equalsIgnoreCase("boolean") && e1.tipo.equalsIgnoreCase(e2.tipo)){
 										Expresion nuevaExp = new Expresion("", 0, 0, 0, "boolean");
@@ -552,7 +552,7 @@ Expresion				::= Expresion:e1 Mas Expresion:e2 {:
 									}
 								}
 						:}
-						|   Expresion:e1 Or M:m Expresion:e2 {:
+						|   Expresion:e1 Or M:m E Expresion:e2 {:
 								if (e1 != null && e2 != null){
 									if (e1.tipo.equalsIgnoreCase("boolean") && e1.tipo.equalsIgnoreCase(e2.tipo)){
 										Expresion nuevaExp = new Expresion("", 0, 0, 0, "boolean");
@@ -727,11 +727,11 @@ DoWhile					::= Do While E:et1 Expresion:e1 LineEnd E:et2{:
 IfStmt					::= If E Expresion:e Then {:
 								MyToken ifTok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-3);
 								SymTable.createSubScope("If" + SymTable.blockName(), ifTok.left, ifTok.right, ifTok.offset); 
-						:} LineEnd M:m1 Block:b{:
+						:} LineEnd M:m1 E Block:b{:
                                                                 CuadTable.backpatch(e.lstVerd, m1.toString());
                                                                 //RESULT = CuadTable.merge(e.lstFals,b.lstSig);
                                                 :} {: SymTable.endScope();
-						:} ElseIfs:elseIfs M:m3 ElseOpt:elseOpt End If M:m2 {:
+						:} M:m5 ElseIfs:elseIfs M:m4 ElseOpt:elseOpt End If M:m2 {:
 								//Statement s = new Statement("", 0, 0, 0, "", "");
 								//s.lstSig = CuadTable.merge(e.lstFals, block.lstSig);
 								//parser.msg("generando if=");
@@ -740,7 +740,9 @@ IfStmt					::= If E Expresion:e Then {:
 								//CuadTable.backpatch(n, m2);
 								
 								if (elseIfs != null) {
-									CuadTable.backpatch(e.lstFals, m3.toString());
+                                                                System.out.println("rrrrrrrrrrrrrrrrrrrrr"+e.lstFals);
+									CuadTable.backpatch(e.lstFals, m5.toString());
+                                                                        CuadTable.backpatch(elseIfs.lstSig,m4.toString());
 									//CuadTable.backpatch(elseIfs.lstSig, m2);
 									if (elseOpt != null){
 										//CuadTable.backpatch(elseIfs.lstFals, elseOpt);
@@ -754,13 +756,18 @@ IfStmt					::= If E Expresion:e Then {:
 								}
 						:};
 
-ElseIfs					::= ElseIfs ElseIf M:m1 Expresion:e Then LineEnd M:m2 Block {:CuadTable.backpatch(e.lstVerd,m2.toString());
+ElseIfs					::=  ElseIf M:m1 Expresion:e Then LineEnd M:m2 E Block M:m3 ElseIfs:e2 {:CuadTable.backpatch(e.lstVerd,m2.toString()); 
                                                                                                     Simbolo sim = new Simbolo("",0,0,0,"");
-                                                                                                    sim.lstFals = e.lstFals;
+                                                                                                    if (e2 != null){
+                                                                                                    CuadTable.backpatch(e.lstFals,m3.toString());
+                                                                                                    sim.lstSig = e2.lstSig;
+                                                                                                    }else{
+                                                                                                    sim.lstSig = e.lstFals;
+                                                                                                    }
                                                                                                     RESULT = sim;:}
 						|	{: RESULT = null; :};
 
-ElseOpt					::= Else M:m Expresion {: RESULT = m; :}
+ElseOpt					::= Else M:m Block {: RESULT = m; :}
 						|	{: RESULT = null; :};
 
 /*
