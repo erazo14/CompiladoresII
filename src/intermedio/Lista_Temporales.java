@@ -111,10 +111,11 @@ public class Lista_Temporales {
         return false;
     }
     
-    public void TemporalenUso(String name, int tipo){ // aqui creo que podria ir el tipo del valor del temporal, deberia de crear una clase tipo
+    public void TemporalenUso(String name, int tipo, boolean referencia){ // aqui creo que podria ir el tipo del valor del temporal, deberia de crear una clase tipo
         for (int i = 0; i < NumTemporales; i++) {
             if(temporales[i].name.equalsIgnoreCase(name)){
                temporales[i].tipo = tipo;
+               temporales[i].referencia = referencia;
                temporales[i].available = false;
                 return;
             }
@@ -122,6 +123,7 @@ public class Lista_Temporales {
         for (int i = 0; i < NTemporalesS; i++) {
             if(this.temp_s[i].name.equalsIgnoreCase(name)){
                 temp_s[i].tipo =tipo;
+                temporales[i].referencia = referencia;
                 temp_s[i].available = false;
                 return;
             }
@@ -130,6 +132,7 @@ public class Lista_Temporales {
         for (int i = 0; i < temp_f.length ; i++) {
             if(temp_f[i].name.equalsIgnoreCase(name)){
                 temp_f[i].tipo = tipo;
+                temporales[i].referencia = referencia;
                 temp_f[i].available = false;
                 return;
             }
@@ -176,6 +179,57 @@ public class Lista_Temporales {
         return Tipo.Sub;    
     }
     
+    public void set_ref (String name , boolean ref){
+        for (int i = 0; i < NumTemporales; i++) {
+            if(temporales[i].name.equalsIgnoreCase(name)){
+                temporales[i].referencia = ref;
+                return;
+            }
+        }
+        for (int i = 0; i < NTemporalesS; i++) {
+            if(this.temp_s[i].name.equalsIgnoreCase(name)){
+                temp_s[i].referencia = ref;
+                return;
+            }
+        }
+        for (int i = 0; i < temp_f.length ; i++) {
+            if(temp_f[i].name.equalsIgnoreCase(name)){
+                temp_f[i].referencia = ref;
+                return;
+            }
+        }
+    }
+    public boolean is_ref(String name){
+                for (int i = 0; i < NumTemporales; i++) {
+            if(temporales[i].name.equalsIgnoreCase(name)){
+                if(temporales[i].referencia){
+                    return true;
+                }
+                else{
+                    return false;
+                }
+            }
+        }
+        for (int i = 0; i < NTemporalesS; i++) {
+            if(this.temp_s[i].name.equalsIgnoreCase(name)){
+                if(temp_s[i].referencia){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        }
+        for (int i = 0; i < temp_f.length ; i++) {
+            if(temp_f[i].name.equalsIgnoreCase(name)){
+                if(temp_f[i].referencia){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
     
     
     public ArrayList<Temporal> getTempActivos(){

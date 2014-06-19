@@ -137,19 +137,6 @@ public class Scope {
 		}
 	}
         
-        public Sub findSub(String id){
-		for (Sub s:this.subs){
-			if (s.id.equalsIgnoreCase(id)){
-				return s;
-			}
-		}
-		
-		if (this.padre == null){
-			return null;
-		}else{
-			return this.padre.findSub(id);
-		}
-	}
 	
 	public void addFunc(Funcion func){
 		this.funciones.add(func);

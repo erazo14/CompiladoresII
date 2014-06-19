@@ -12,7 +12,10 @@ package symtable;
  */
 public class Parametro extends Simbolo{
 	public String passMech;
-	
+        public int Tipo;
+        private String id1;
+        private boolean porReferencia;
+        
 	public Parametro(String passMech, String id, Integer linea, Integer columna, Integer offset, String tipo) {
 		super(id, linea, columna, offset, tipo);
 		this.passMech = passMech;
@@ -21,5 +24,5 @@ public class Parametro extends Simbolo{
 	public Parametro(String passMech, String id, Integer linea, Integer columna, Integer offset, String tipo, String lugar) {
 		super(id, linea, columna, offset, tipo, lugar);
 		this.passMech = passMech;
-	}
+	}      
 }

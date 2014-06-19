@@ -14,6 +14,7 @@ public class Temporal {
      public String name;
     public boolean available;
     public int tipo;
+    public boolean referencia;
     
     public Temporal(String s/*, int tipo*/){
         this.name = s;
