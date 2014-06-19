@@ -17,19 +17,19 @@ import symtable.SymTable;
  * @author usuario
  */
 public class CodigoFinal {
-        public static ArrayList<Cuadruplo> cuadruplos = new ArrayList<>();
-        SymTable Tabla;
-        Cuadruplo cuad;
+        //public static ArrayList<Cuadruplo> cuadruplos = new ArrayList<>();
+        static SymTable Tabla;
+        //static Cuadruplo cuad;
         //Simbolo SimboloActual;
-        Lista_Temporales t = new Lista_Temporales();
+        static Lista_Temporales t = new Lista_Temporales();
       //  CuadTable Cuadruplos1;
-        Scope SimboloActual;
-        ArrayList<Texto> mensajes;
-        Lista_Temporales temporales;
+        static Scope SimboloActual;
+        static ArrayList<Texto> mensajes;
+        static Lista_Temporales temporales;
         //CuadTable tempo; // maneja la lista de los temporales
-        int cont_copia_string;
-        Stack<ArrayList<String>> tempActivas;
-        ArrayList<String> escribe;
+        static int cont_copia_string;
+        static Stack<ArrayList<String>> TempActivas;
+        static ArrayList<String> escribe;
         
         public CodigoFinal(SymTable Tabla, /*CuadTable Cuadruplos,*/ ArrayList<Texto> mensajes) {
         this.Tabla = Tabla;
@@ -38,12 +38,15 @@ public class CodigoFinal {
         this.mensajes = mensajes;
         this.temporales = new Lista_Temporales();
         this.cont_copia_string = 0;
-        this.tempActivas = new Stack();
+        this.TempActivas = new Stack();
         this.escribe = new ArrayList();
     		
 	}
         
-           public void FinalCode(){
+           public static ArrayList<String> FinalCode(){
+              
+               escribe = new ArrayList();
+               mensajes = new ArrayList();
         escribe.add(".data");
        escribe.add("_true: .asciiz \"True\" ");
        escribe.add("_false: .asciiz \"False\" ");
@@ -64,125 +67,139 @@ public class CodigoFinal {
         Scope s;
         
          for (int i = 0; i < CuadTable.cuadruplos.size(); i++){
-			switch(cuad.operator){
+             System.out.println(i+"...."+CuadTable.cuadruplos.get(i).operator);
+			switch(CuadTable.cuadruplos.get(i).operator){
                         case "+":
-                            if(istempf(cuad.operand1)){
-                                escribe.add("add" + cuad.dest + "," + cuad.operand1 + "," + cuad.operand2 );
+                            //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
+                                escribe.add("add" + CuadTable.cuadruplos.get(i).dest + "," + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2 );
                                 tipo = Tipo.Int;
-                                }
-                                temporales.TemporalLibre(cuad.operand1);
-                                temporales.TemporalLibre(cuad.operand2);
-                                temporales.TemporalenUso(cuad.dest, tipo);
+                                //}
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
+                                //temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo);
                                 break;
 			case "-":
-                            if(istempf(cuad.operand1)){
-                                escribe.add("sub" + cuad.dest + "," + cuad.operand1 + "," + cuad.operand2);
+                            //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
+                                escribe.add("sub" + CuadTable.cuadruplos.get(i).dest + "," + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2);
                                 tipo = Tipo.Int;
-                                }
-                                temporales.TemporalLibre(cuad.operand1);
-                                temporales.TemporalLibre(cuad.operand2);
-                                temporales.TemporalenUso(cuad.dest, tipo);
+                                //}
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
+                                //temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo);
                                 
                                 break;
 			case "*":
-                            if(istempf(cuad.operand1)){
-                                escribe.add("mul" + cuad.dest + "," + cuad.operand1 + "," + cuad.operand2);
+                            //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
+                                escribe.add("mul" + CuadTable.cuadruplos.get(i).dest + "," + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2);
                                 tipo = Tipo.Int;
-                                }
-                                temporales.TemporalLibre(cuad.operand1);
-                                temporales.TemporalLibre(cuad.operand2);
-                                temporales.TemporalenUso(cuad.dest, tipo);
+//                                }
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
+                                //temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo);
                                 break;
 			case "/":
-                            if(istempf(cuad.operand1)){
-                                escribe.add("div" + cuad.dest + "," + cuad.operand1 + "," + cuad.operand2);
+                            //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
+                                escribe.add("div" + CuadTable.cuadruplos.get(i).dest + "," + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2);
 				tipo = Tipo.Int;
-                                }
-                                temporales.TemporalLibre(cuad.operand1);
-                                temporales.TemporalLibre(cuad.operand2);
-                                temporales.TemporalenUso(cuad.dest, tipo);
+  //                              }
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
+                                //temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo);
                                 break;
                         case "Not":
-                            if(istempf(cuad.operand1)){
-                                escribe.add("Neg" + cuad.dest + "," + cuad.operand1); 
+                            //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
+                                escribe.add("Neg" + CuadTable.cuadruplos.get(i).dest + "," + CuadTable.cuadruplos.get(i).operand1); 
                                 tipo = Tipo.Int;
-                                }
-                                temporales.TemporalLibre(cuad.operand1);
-                                temporales.TemporalenUso(cuad.dest, tipo);
+  //                              }
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                                //temporales.TemporalenUso(CuadTable.cuadruplos.get(i).dest, tipo);
                                 break;
                         case "=":
                                 // creo que es medio fumado, ya que tiene que ver que es lo que iguala, nose si estoy equivada
                                 break;
                         case "goto": 
-                                 escribe.add("b "+ CuadTable.cuadruplos.get(Integer.parseInt(cuad.dest)).operator);
+                            String hola =CuadTable.cuadruplos.get(i).dest;
+                            int juan =Integer.parseInt(hola);
+                            System.out.println(juan);
+                            System.out.println("rrrrrrrrrrrrrrrrrr"+CuadTable.cuadruplos.get().operator);
+//                                 escribe.add("b "+ CuadTable.cuadruplos.get(Integer.parseInt(CuadTable.cuadruplos.get(i).dest)).operator);
                                  break;
-                        case "if <":
-                                if(istempf(cuad.operand1)){
-                                    escribe.add("blt" + cuad.operand1 + "," + cuad.operand2 + "," + cuad.dest);
-                                }
-                                temporales.TemporalLibre(cuad.operand1);
-                                temporales.TemporalLibre(cuad.operand2);
+                        case "if<":
+                                //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
+                                    escribe.add("blt" + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2 + "," + CuadTable.cuadruplos.get(i).dest);
+  //                              }
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
                                 break;
-                        case "if >":
-                                 if(istempf(cuad.operand1)){
-                                    escribe.add("bgt" + cuad.operand1 + "," + cuad.operand2 + "," + cuad.dest);
-                                }
-                                temporales.TemporalLibre(cuad.operand1);
-                                temporales.TemporalLibre(cuad.operand2);
+                        case "if>":
+                                 //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
+                                    escribe.add("bgt" + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2 + "," + CuadTable.cuadruplos.get(i).dest);
+  //                              }
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
                                 break;
-                        case "if <=":
-                                if(istempf(cuad.operand1)){
-                                    escribe.add("ble" + cuad.operand1 + "," + cuad.operand2 + "," + cuad.dest);
-                                }
-                                temporales.TemporalLibre(cuad.operand1);
-                                temporales.TemporalLibre(cuad.operand2);
+                        case "if<=":
+                                //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
+                                    escribe.add("ble" + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2 + "," + CuadTable.cuadruplos.get(i).dest);
+  //                              }
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
                                 break;
-                        case "if >=":
-                                if(istempf(cuad.operand1)){
-                                    escribe.add("bge" + cuad.operand1 + "," + cuad.operand2 + "," + cuad.dest);
-                                }
-                                temporales.TemporalLibre(cuad.operand1);
-                                temporales.TemporalLibre(cuad.operand2);
+                        case "if>=":
+                                //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
+                                    escribe.add("bge" + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2 + "," + CuadTable.cuadruplos.get(i).dest);
+  //                              }
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
                                 break;
-                        case "if =":
-                            if(istempf(cuad.operand1)){
-                                escribe.add("beq" + cuad.operand1 + "," + cuad.operand2);
-                                }else{
-                                    if(cuad.operand2.equalsIgnoreCase("true")){
-                                        escribe.add("beq" + cuad.operand1 + ", 1 ," + cuad.dest);
-                                                }else{
-                                                    escribe.add("beq" + cuad.operand1 + "," + cuad.operand2 + "," + cuad.dest);
-                                    }
-                            }
-                                temporales.TemporalLibre(cuad.operand1);
-                                temporales.TemporalLibre(cuad.operand2);                  
+                        case "if=":
+                            //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
+                                escribe.add("beq" + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2);
+  //                              }else{
+  //                                  if(CuadTable.cuadruplos.get(i).operand2.equalsIgnoreCase("true")){
+  //                                      escribe.add("beq" + CuadTable.cuadruplos.get(i).operand1 + ", 1 ," + CuadTable.cuadruplos.get(i).dest);
+  //                                              }else{
+  //                                                  escribe.add("beq" + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2 + "," + CuadTable.cuadruplos.get(i).dest);
+  //                                  }
+  //                          }
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                                //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);                  
                                 break;
                         case "if": //nose cual usar aqui
-                            if(istempf(cuad.operand1)){
-                                escribe.add("nose que va aqui" + cuad.operand1 + "," + cuad.dest);
-                                }
-                                    temporales.TemporalLibre(cuad.operand1);
-                                    temporales.TemporalLibre(cuad.dest);
+                            //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
+                                escribe.add("b" + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).dest);
+ //                               }
+                                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).dest);
                                 break;
-                        case"if !=":
-                                if(istempf(cuad.operand1)){
-                                    escribe.add("bne" + cuad.operand1 + "," + cuad.operand2 + "," + cuad.dest);
-                                }
-                                    temporales.TemporalLibre(cuad.operand1);
-                                    temporales.TemporalLibre(cuad.operand2);
+                        case "if<>":
+                                //if(istempf(CuadTable.cuadruplos.get(i).operand1)){
+                                    escribe.add("bne" + CuadTable.cuadruplos.get(i).operand1 + "," + CuadTable.cuadruplos.get(i).operand2 + "," + CuadTable.cuadruplos.get(i).dest);
+  //                              }
+                                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
+                                    //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
                                 break;
-                        case "_etiq":
+                        case "_etiq": //dentro del default
                                 
                                 break;
-                        case "Call":                           
+                        case "Call":         /*                  
                           //      s = SimboloActual.findVar(cuad.dest); // esta cosa me esta cayendo mal
                                 escribe.add("jal nombredelafuncion" + s.nombre);
-                                            
-                    
-                        
+                                 if(!TempActivas.empty()){
+                                     ArrayList<String> temps = this.TempActivas.pop();
+                                     for (String temporales : temps) {
+                                        if(this.istempf(temporales)){
+                                         escribe.add("l.s "+temporales+" , ($sp)" );
+                                 }else{
+                                     escribe.add("lw "+temporales+" , ($sp)" );
+                                 }
+                                    escribe.add("add $sp , $sp , 4");
+                                    }
+                                }    */                                                                                 
                     break;
                         }
-		}  
+		}
+         return escribe;
     }
 	
     public boolean istemp(String s){
@@ -193,7 +210,7 @@ public class CodigoFinal {
         }
     }
     
-    public boolean istempf(String s){ 
+    public static boolean istempf(String s){ 
         if(s.startsWith("$f")){
             return true;
         }else{
@@ -201,14 +218,14 @@ public class CodigoFinal {
         }
     }
     
-     public boolean istemps(String s){
+     public static boolean istemps(String s){
         if(s.startsWith("$s")){
             return true;
         }else{
             return false;
         }        
     }
-    public boolean isint(String s){
+    public static boolean isint(String s){
         try{
             Integer.parseInt(s);
         }catch(Exception e){
@@ -218,13 +235,13 @@ public class CodigoFinal {
     }
     
     
-    public boolean iscadena(String s){
+    public static boolean iscadena(String s){
         if(s.startsWith("_msg")){
             return true;
         }
         return false;
     }
-    public boolean isid(String s){
+    public static boolean isid(String s){
         if(SimboloActual.findVar(s)!=null){
             return true;
         }else{
@@ -232,7 +249,6 @@ public class CodigoFinal {
             return false;
         }
     }
-        
- 
-           
+    
+    
 }
