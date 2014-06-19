@@ -71,6 +71,10 @@ public class Cuadruplo {
 				return "if " + this.operand1 + " >= " + this.operand2 + " goto " + this.dest;
                         case "_etiq":
                             return this.operator + ": ";
+                        case "call":
+                            return this.operator + " _" + this.dest;
+                        case "param":
+                            return this.operator+ " " + this.operand1;
 			default:
 				return this.operator + ":";
 		}

@@ -267,7 +267,7 @@ VarDecl					::= Dim Id As Tipo:tipo {:
 								}
 						:};
 
-SubDecl					::= Sub Id {: 
+SubDecl					::= Sub Id:i {: 
 								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
 
 								if (SymTable.curScope.hasSub(myid.value.toString())){
@@ -281,12 +281,12 @@ SubDecl					::= Sub Id {:
 										SymTable.existeMain = true;
 									}
 								}
-								CuadTable.gen(myid.value.toString());
 								Sub newSub = new Sub(myid.value.toString(), myid.left, myid.right, myid.offset);
 								SymTable.curScope.addSub(newSub);
 								SymTable.curMethod = newSub;
 								SymTable.createSubScope(myid.value.toString(), myid.left, myid.right, myid.offset);
-						:} Params LineEnd Block End Sub {:
+						:} Params{:CuadTable.gen(i.toString());:} LineEnd Block End Sub {:
+                                                                
 								SymTable.endScope();
 								SymTable.curMethod = null;
 						:};
@@ -733,7 +733,7 @@ IfStmt					::= If E Expresion:e Then {:
                                                                 CuadTable.backpatch(e.lstVerd, m1.toString());
                                                                 //RESULT = CuadTable.merge(e.lstFals,b.lstSig);
                                                 :} {: SymTable.endScope();
-						:} M:m5 ElseIfs:elseIfs M:m4 ElseOpt:elseOpt End If M:m2 {:
+						:} M:m5 E ElseIfs:elseIfs M:m4 ElseOpt:elseOpt End If M:m2 {:
 								//Statement s = new Statement("", 0, 0, 0, "", "");
 								//s.lstSig = CuadTable.merge(e.lstFals, block.lstSig);
 								//parser.msg("generando if=");
@@ -769,7 +769,7 @@ ElseIfs					::=  ElseIf M:m1 Expresion:e Then LineEnd M:m2 E Block M:m3 ElseIfs:
                                                                                                     RESULT = sim;:}
 						|	{: RESULT = null; :};
 
-ElseOpt					::= Else M:m Block {: RESULT = m; :}
+ElseOpt					::= Else M:m Block LineEnd {: RESULT = m; :}
 						|	{: RESULT = null; :};
 
 /*
@@ -822,6 +822,7 @@ ParamLst				::= PassMech:passMech Id As Tipo:tipo {:
 									parser.syntax_error(tipo);
 									parser.appendErr("\"" + tipo.value.toString() + "\" no es un tipo valido");
 								}
+                                                                CuadTable.gen("param",myid.value.toString());
 						:}
 						|	ParamLst:paramLst Coma PassMech:passMech Id:id As Tipo:tipo {:
 								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
@@ -838,6 +839,7 @@ ParamLst				::= PassMech:passMech Id As Tipo:tipo {:
 									parser.syntax_error(tipo);
 									parser.appendErr("\"" + tipo.value.toString() + "\" no es un tipo valido");
 								}
+                                                                CuadTable.gen("param",myid.value.toString());
 						:};
 
 PassMech				::= ByVal:byVal {: RESULT = byVal.toString().toLowerCase(); :}
@@ -897,7 +899,7 @@ FuncEval				::= Id Args:args {:
 									}
                                                                         RESULT = new Termino(myid.value.toString(), myid.left, myid.right, myid.offset, f.tipo, CuadTable.newTemp());
                                                                     }else{
-                                                                        CuadTable.gen("Call",myid.value.toString());   // pendientes del tipo
+                                                                        CuadTable.gen("call",myid.value.toString(),"void");   // pendientes del tipo
                                                                         if (s.parametros.size() != args.size()){
 										parser.syntax_error(myid);
 										parser.appendErr("La funcion \"" + myid.value.toString() + "\" recibe " + s.parametros.size() + " argumentos. Se pasaron " + args.size());

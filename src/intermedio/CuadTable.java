@@ -107,6 +107,12 @@ public final class CuadTable {
                         case "_etiq":
 				CuadTable.cuadruplos.add(new Cuadruplo(newetiq()));
 				break;
+                        case "call":
+				CuadTable.cuadruplos.add(new Cuadruplo(operador,args[1],args[0]));
+				break;
+                        case "param":
+				CuadTable.cuadruplos.add(new Cuadruplo(operador,args[0]));
+				break;
 			default:
                                 CuadTable.cuadruplos.add(new Cuadruplo("_"+operador));
 				break;

@@ -26,7 +26,7 @@ public class Final extends javax.swing.JFrame {
     private void setCode(){
         ArrayList<String> Final;
         Final = CodigoFinal.FinalCode();
-        String buffer = null;
+        String buffer = "";
         for (int i = 0; i < Final.size(); i++) {
             buffer+= Final.get(i)+"\n";
         }
