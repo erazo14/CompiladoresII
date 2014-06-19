@@ -110,6 +110,9 @@ public final class CuadTable {
                         case "call":
 				CuadTable.cuadruplos.add(new Cuadruplo(operador,args[1],args[0]));
 				break;
+                        case "write":
+                                CuadTable.cuadruplos.add(new Cuadruplo(operador,args[1],args[0]));
+                                break;
                         case "param":
 				CuadTable.cuadruplos.add(new Cuadruplo(operador,args[0]));
 				break;

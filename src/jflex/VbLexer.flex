@@ -26,7 +26,9 @@ import parser.MyToken;
 		return new MyToken(type, yyline + 1, yycolumn + 1, yychar, value); 
 	}
 %}
-
+/* Consola */
+Write                           = "Write"
+Read                            = "Read"
 
 /* Tipos */
 
@@ -130,6 +132,11 @@ CaracterDeEntrada	= [^\r\n]
 %%
 
 <YYINITIAL>{	
+        /* Consola */
+
+        {Write}                         {return symbol(sym.Write, yytext());}
+        {Read}                          {return symbol(sym.Read, yytext());}
+
 	/* Tipos */
 
 	{Integer} 			{return symbol(sym.Integer, yytext());}

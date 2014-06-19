@@ -152,7 +152,7 @@ parser code {:
 terminal			Dim,Mas,Menos,Por,Entre,Menor,Mayor,Not,And,Or,
 					For,To,Step,Next,Loop,Do,While,Until,If,Then,Else,ElseIf,End,Integer,
 					Boolean,Char,String,ByVal,ByRef,As,Sub,Function,
-					Write,Writeln,Coma,Punto,ParI,ParD,True,GuionBajo,Igual,Id,
+					Write,Read,Coma,Punto,ParI,ParD,True,GuionBajo,Igual,Id,
 					CambioDeLinea,Concatenar,InicioDeLinea,NuevaLinea,MayorIgual,
 					MenorIgual,False,Call,Exit,Input,Type,Ampersand;
 
@@ -179,6 +179,8 @@ non terminal		ArrayList<Simbolo> Block;
 non terminal            ArrayList<Simbolo> BlockStmts;
 
 non terminal            Simbolo BlockStmt;
+
+non terminal            Consola;
 
 non terminal		MainDecl, MainHead, MainBody;
 
@@ -249,6 +251,18 @@ RootStmt				::= VarDecl LineEnd
 						|	SubDecl LineEnd
 						|	FuncDecl LineEnd
 						|	TypeDecl LineEnd;
+
+Consola                                 ::= Write Id {:
+                                                        MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
+                                                        System.out.println("rrrrrrrrrrrrrrrrrrrrrr"+myid.value.toString());
+                                                        Variable input;
+                                                        input = SymTable.curScope.findVar(myid.value.toString());
+                                                        if(input != null){
+                                           //                 CuadTable.gen("write",input.tipo,input.id);
+                                                            System.out.println("yyyyyyyyyyyyyyyyyyy"+input.id);
+                                                        }
+                                                    :}
+                                                |       Read Termino;
 
 VarDecl					::= Dim Id As Tipo:tipo {: 
 								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
@@ -374,6 +388,7 @@ BlockStmt				::= VarDecl LineEnd
 						|	ForLoop:f LineEnd{:CuadTable.backpatch(f.lstSig,CuadTable.sigCuad);RESULT=f;:}
 						|	DoWhile:D LineEnd{:CuadTable.backpatch(D.lstSig,CuadTable.sigCuad);RESULT=D;:}
 						|	IfStmt LineEnd{::}
+                                                |       Consola LineEnd
 						|	Asignacion LineEnd
 						|	MethodCall LineEnd;
 
@@ -728,7 +743,8 @@ DoWhile					::= Do While E:et1 Expresion:e1 LineEnd E:et2{:
 
 IfStmt					::= If E Expresion:e Then {:
 								MyToken ifTok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-3);
-								SymTable.createSubScope("If" + SymTable.blockName(), ifTok.left, ifTok.right, ifTok.offset); 
+								SymTable.createSubScope("If" + SymTable.blockName(), ifTok.left, ifTok.right, ifTok.offset);
+                                                                Simbolo nuevo = new Simbolo("",0,0,0,"");
 						:} LineEnd M:m1 E Block:b{:
                                                                 CuadTable.backpatch(e.lstVerd, m1.toString());
                                                                 //RESULT = CuadTable.merge(e.lstFals,b.lstSig);
@@ -747,14 +763,14 @@ IfStmt					::= If E Expresion:e Then {:
                                                                         CuadTable.backpatch(elseIfs.lstSig,m4.toString());
 									//CuadTable.backpatch(elseIfs.lstSig, m2);
 									if (elseOpt != null){
-										//CuadTable.backpatch(elseIfs.lstFals, elseOpt);
+										CuadTable.backpatch(elseIfs.lstFals, m4.toString());
 									}else{
-										//CuadTable.backpatch(elseIfs.lstFals, m2);
+										CuadTable.backpatch(elseIfs.lstFals, m2.toString());
 									}
 								}else if (elseOpt != null){
-									//CuadTable.backpatch(e.lstFals, elseOpt);
+									CuadTable.backpatch(e.lstFals, m4.toString());
 								}else{
-									//CuadTable.backpatch(e.lstFals, m2);
+									CuadTable.backpatch(e.lstFals, m2-1+"");
 								}
 						:};
 
@@ -769,7 +785,7 @@ ElseIfs					::=  ElseIf M:m1 Expresion:e Then LineEnd M:m2 E Block M:m3 ElseIfs:
                                                                                                     RESULT = sim;:}
 						|	{: RESULT = null; :};
 
-ElseOpt					::= Else M:m Block LineEnd {: RESULT = m; :}
+ElseOpt					::= Else LineEnd M:m Block  {: RESULT = m; :}
 						|	{: RESULT = null; :};
 
 /*
