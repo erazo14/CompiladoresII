@@ -25,6 +25,10 @@ public  class SymTable {
 	private SymTable(){
 	}
 	
+        
+        public Scope getrootScope(){
+            return rootScope;
+        }
 	public static void init(){
 		SymTable.scopes = new ArrayList<>();
 		SymTable.rootScope = SymTable.createScope(null, "root", 0, 0, 0);
