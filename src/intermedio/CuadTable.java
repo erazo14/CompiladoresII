@@ -7,6 +7,7 @@
 package intermedio;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Stack;
 import symtable.Scope;
 import symtable.Simbolo;
@@ -68,7 +69,11 @@ public final class CuadTable {
 	}
 	
 	public static ArrayList<Integer> merge(ArrayList list1, ArrayList list2){
-		return null;
+            for (int i = 0; i < list2.size(); i++) {
+                list1.add(list2.get(i));
+            }
+            Collections.sort(list1);            
+            return list1;
 	}
 	
 	public static void backpatch(ArrayList lista, Object cuad){
@@ -121,7 +126,8 @@ public final class CuadTable {
                         case "_etiq":
 				CuadTable.cuadruplos.add(new Cuadruplo(newetiq()));
 				break;
-			default:	
+			default:
+                                CuadTable.cuadruplos.add(new Cuadruplo("_"+operador));
 				break;
 		}
 		

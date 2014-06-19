@@ -36,6 +36,9 @@ scan with {:
 	return symbol != null ? symbol : getSymbolFactory().newSymbol("END_OF_FILE", EOF_sym());
 :}
 */
+action code {:
+    ArrayList<Integer> lstFal;
+:}
 parser code {: 
 	private VbLexer lexer;
 	private ArrayList<VbSyntaxError> errLst = new ArrayList<>();
@@ -171,9 +174,9 @@ non terminal		ProgStart, Root, RootStmts, RootStmt, RootDecl, VarDecl ,
                                         BlockDecl, IdLst,
 					FuncDecl, FuncBody, SubDecl, SubBody;
 
-non terminal		Simbolo Block;
+non terminal		ArrayList<Simbolo> Block;
 
-non terminal            Simbolo BlockStmts;
+non terminal            ArrayList<Simbolo> BlockStmts;
 
 non terminal            Simbolo BlockStmt;
 
@@ -264,7 +267,7 @@ VarDecl					::= Dim Id As Tipo:tipo {:
 
 SubDecl					::= Sub Id {: 
 								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
-
+                                                                CuadTable.gen(myid.value.toString());
 								if (SymTable.curScope.hasSub(myid.value.toString())){
 									parser.syntax_error(myid);
 									parser.appendErr("Sub \"" + myid.value.toString() + "\" ya existe");
@@ -348,15 +351,27 @@ TypeVarDecl				::= Id As Tipo:tipo{:
 
 /* BLOCK */
 
-Block					::= BlockStmts | /* lambda */;
+Block					::= BlockStmts:b{:if(b != null){RESULT=b;}else{RESULT=null;}:} | /* lambda */;
 
-BlockStmts				::= BlockStmt
-						|	BlockStmts BlockStmt;
+BlockStmts				::= BlockStmt:b{:   if(b != null){System.out.println("ttttttttttttttxxxxxxx"+b.lstSig.get(0));
+                                                            ArrayList<Simbolo> sim= new ArrayList<Simbolo>();
+                                                            sim.add(b);
+                                                            RESULT=sim;}else{RESULT = null;}:}
+						|	BlockStmts:b1 BlockStmt:b{: if(b != null && b1 != null){
+                                                                                        b1.add(b);
+                                                                                        RESULT=b1;
+                                                                                    }
+                                                                                    else if(b != null && b1 == null){
+                                                                                        ArrayList<Simbolo> sim= new ArrayList<Simbolo>();
+                                                                                        sim.add(b);
+                                                                                        RESULT=sim;
+                                                                                    }
+                                                                                    else{RESULT=null;}:};
 
 BlockStmt				::= VarDecl LineEnd
-						|	ForLoop LineEnd
-						|	DoWhile LineEnd
-						|	IfStmt LineEnd
+						|	ForLoop:f LineEnd{:CuadTable.backpatch(f.lstSig,CuadTable.sigCuad);RESULT=f;:}
+						|	DoWhile:D LineEnd{:CuadTable.backpatch(D.lstSig,CuadTable.sigCuad);RESULT=D;:}
+						|	IfStmt LineEnd{::}
 						|	Asignacion LineEnd
 						|	MethodCall LineEnd;
 
@@ -677,20 +692,22 @@ ForLoop					::= For Id Igual Expresion:e1 M:m1 To Expresion:e2 M:m2 LineEnd {:
                                                                 CuadTable.gen("=",e1.lugar,myid.value.toString());
                                                                 CuadTable.gen("_etiq",e1.lugar,myid.value.toString());
                                                                 CuadTable.gen("if<",e1.lugar,e2.lugar,m2+4 + "");
+                                                                 lstFal =CuadTable.makeList(CuadTable.sigCuad);
                                                                 CuadTable.gen("goto","");
-                                                                CuadTable.backpatch(n,CuadTable.sigCuad);
-						:} Block Next Id {:
+                                                                
+						:} Block:b Next Id {:
 								SymTable.endScope();
                                                                 String temp = CuadTable.newTemp();
                                                                 Simbolo nuevo = new Simbolo("",0,0,0,"");
                                                                 MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
                                                                 CuadTable.gen("+",myid.value.toString(),1+"",temp);
                                                                 CuadTable.gen("=",temp,myid.value.toString());
-                                                                nuevo.lstSig = CuadTable.makeList(CuadTable.sigCuad);
-                                                                System.out.pritnln("****************************"+nuevo.lstSig);
-                                                                Integer puesto = m2+1;
-                                                                //System.out.println("*******************"+puesto);
-                                                                //CuadTable.gen("goto",m2.toString());
+                                                                nuevo.lstSig = lstFal;
+                                                                if(b != null){
+                                                                    for(int i = 0; i<b.size();i++){
+                                                                        nuevo.lstSig = b.get(i).lstSig;
+                                                                    }
+                                                                }
                                                                 RESULT = nuevo;
                                                 :}N:n{:CuadTable.backpatch(n,m2+1+"");:};
 
@@ -705,19 +722,16 @@ DoWhile					::= Do While E:et1 Expresion:e1 LineEnd E:et2{:
 						:} Block:b N:n{:
 								SymTable.endScope();
                                                                 CuadTable.backpatch(n,et1.toString());
-                                                                CuadTable.gen("hola");
-                                                               // if(b.lstSig != null)
-                                                                 //   CuadTable.backpatch(b.lstSig,et1.toString());
 						:} Loop;
 
-IfStmt					::= If Expresion:e Then {:
-								MyToken ifTok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-2);
+IfStmt					::= If E Expresion:e Then {:
+								MyToken ifTok = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-3);
 								SymTable.createSubScope("If" + SymTable.blockName(), ifTok.left, ifTok.right, ifTok.offset); 
 						:} LineEnd M:m1 Block:b{:
-                                                                //CuadTable.backpatch(e.lstVerd, m1.toString());
+                                                                CuadTable.backpatch(e.lstVerd, m1.toString());
                                                                 //RESULT = CuadTable.merge(e.lstFals,b.lstSig);
-                                                :} N:n {: SymTable.endScope();
-						:} ElseIfs:elseIfs ElseOpt:elseOpt End If M:m2 {:
+                                                :} {: SymTable.endScope();
+						:} ElseIfs:elseIfs M:m3 ElseOpt:elseOpt End If M:m2 {:
 								//Statement s = new Statement("", 0, 0, 0, "", "");
 								//s.lstSig = CuadTable.merge(e.lstFals, block.lstSig);
 								//parser.msg("generando if=");
@@ -726,7 +740,7 @@ IfStmt					::= If Expresion:e Then {:
 								//CuadTable.backpatch(n, m2);
 								
 								if (elseIfs != null) {
-									//CuadTable.backpatch(e.lstFals, elseIfs.lugar);
+									CuadTable.backpatch(e.lstFals, m3.toString());
 									//CuadTable.backpatch(elseIfs.lstSig, m2);
 									if (elseOpt != null){
 										//CuadTable.backpatch(elseIfs.lstFals, elseOpt);
@@ -740,7 +754,10 @@ IfStmt					::= If Expresion:e Then {:
 								}
 						:};
 
-ElseIfs					::= ElseIfs ElseIf M:m1 Expresion:e Then LineEnd M:m2 Block {://n:}
+ElseIfs					::= ElseIfs ElseIf M:m1 Expresion:e Then LineEnd M:m2 Block {:CuadTable.backpatch(e.lstVerd,m2.toString());
+                                                                                                    Simbolo sim = new Simbolo("",0,0,0,"");
+                                                                                                    sim.lstFals = e.lstFals;
+                                                                                                    RESULT = sim;:}
 						|	{: RESULT = null; :};
 
 ElseOpt					::= Else M:m Expresion {: RESULT = m; :}
