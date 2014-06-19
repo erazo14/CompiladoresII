@@ -19,7 +19,7 @@ public class Temporal {
     public Temporal(String s/*, int tipo*/){
         this.name = s;
         this.tipo = tipo;
-        available = false;
+        
         
     }
 }

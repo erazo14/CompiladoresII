@@ -206,24 +206,25 @@ public class CodigoFinal {
                                     //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
                                     //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
                                 break;
-                        case "_etiq": //dentro del default
+                      /*  case "_etiq": //dentro del default
                                 escribe.add(CuadTable.cuadruplos.get(i).dest);
                                 
-                                break;
-                        case "Call":         /*                  
-                          //      s = SimboloActual.findVar(cuad.dest); // esta cosa me esta cayendo mal
-                                escribe.add("jal nombredelafuncion" + s.nombre);
+                                break;*/
+                        case "call":                          
+                            //    s = SimboloActual.findVar1(CuadTable.cuadruplos.get(i).dest);
+                                s = SymTable.curScope.findVar1(CuadTable.cuadruplos.get(i).dest);// esta cosa me esta cayendo mal
+                                escribe.add("jal _func" + s.nombre);
                                  if(!TempActivas.empty()){
-                                     ArrayList<String> temps = this.TempActivas.pop();
-                                     for (String temporales : temps) {
-                                        if(this.istempf(temporales)){
-                                         escribe.add("l.s "+temporales+" , ($sp)" );
+                                     ArrayList<String> temps = TempActivas.pop();
+                                     for (String temporales1 : temps) {
+                                        if(istempf(temporales1)){
+                                         escribe.add("l.s "+temporales1+" , ($sp)" );
                                  }else{
-                                     escribe.add("lw "+temporales+" , ($sp)" );
+                                     escribe.add("lw "+temporales1+" , ($sp)" );
                                  }
                                     escribe.add("add $sp , $sp , 4");
                                     }
-                                }    */                                                                                 
+                                }                                                                                   
                                 break;
                         case "_main":
                             escribe.add("main:");
