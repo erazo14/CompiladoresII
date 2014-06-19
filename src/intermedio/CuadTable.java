@@ -29,7 +29,7 @@ public final class CuadTable {
         
    
 	public static String newTemp(){
-		return "t" + CuadTable.tempSequence++;
+		return "$t" + CuadTable.tempSequence++;
 	}
         
         public static String newetiq(){
