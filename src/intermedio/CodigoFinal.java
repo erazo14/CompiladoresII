@@ -206,24 +206,25 @@ public class CodigoFinal {
                                     //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand1);
                                     //temporales.TemporalLibre(CuadTable.cuadruplos.get(i).operand2);
                                 break;
-                        case "_etiq": //dentro del default
+                      /*  case "_etiq": //dentro del default
                                 escribe.add(CuadTable.cuadruplos.get(i).dest);
                                 
-                                break;
-                        case "Call":         /*                  
-                          //      s = SimboloActual.findVar(cuad.dest); // esta cosa me esta cayendo mal
-                                escribe.add("jal nombredelafuncion" + s.nombre);
+                                break;*/
+                        case "call":                          
+                            //    s = SimboloActual.findVar1(CuadTable.cuadruplos.get(i).dest);
+                                s = SymTable.curScope.findVar1(CuadTable.cuadruplos.get(i).dest);// esta cosa me esta cayendo mal
+                                escribe.add("jal _func" + s.nombre);
                                  if(!TempActivas.empty()){
-                                     ArrayList<String> temps = this.TempActivas.pop();
-                                     for (String temporales : temps) {
-                                        if(this.istempf(temporales)){
-                                         escribe.add("l.s "+temporales+" , ($sp)" );
+                                     ArrayList<String> temps = TempActivas.pop();
+                                     for (String temporales1 : temps) {
+                                        if(istempf(temporales1)){
+                                         escribe.add("l.s "+temporales1+" , ($sp)" );
                                  }else{
-                                     escribe.add("lw "+temporales+" , ($sp)" );
+                                     escribe.add("lw "+temporales1+" , ($sp)" );
                                  }
                                     escribe.add("add $sp , $sp , 4");
                                     }
-                                }    */                                                                                 
+                                }                                                                                   
                                 break;
                         case "_main":
                             escribe.add("main:");
@@ -236,7 +237,7 @@ public class CodigoFinal {
                                 break;
                         case "read":
                                 Scope sc = null;
-                              //   sc = SimboloActual.findVar(CuadTable.cuadruplos.get(i).dest);
+                            //     sc = SimboloActual.findVar(CuadTable.cuadruplos.get(i).dest);
                             switch (sc.getTipo()){
                                 case Tipo.Int:
                                      escribe.add("li $v0 , 5");
@@ -388,34 +389,125 @@ public class CodigoFinal {
                         
                                 }
                                 break;
-                    case "SAVE_PARAMS":/*
-                        dir = 12;
+                    case "Saveparam":
+                       // dir = 12;
                         ArrayList<Temporal> activos = temporales.getTempActivos();;
-                        t = Cuadruplos.cuadruplos.indexOf(quad) + 1;
+                        t = CuadTable.cuadruplos.indexOf(CuadTable.cuadruplos)+ 1;
                         ArrayList<String> temporales_parametros = new ArrayList();
                         ArrayList<String> tempos_guardados = new ArrayList();
-                        while(Cuadruplos.cuadruplos.get(t).operacion.equals("PARAM")){
-                        temporales_parametros.add(Cuadruplos.cuadruplos.get(t).resultado);
+                        while(CuadTable.cuadruplos.get(t).operator.equals("param")){
+                        temporales_parametros.add(CuadTable.cuadruplos.get(t).dest);
                         t++;
                         }
-                       for (Temporal tempo : activos) {
-                          if(!temporales_parametros.contains(tempo.name)){
-                            if(this.es_tempf(tempo.name)){
-                                escribe.add("s.s "+tempo.name +" , -4($sp)");
-                            }else{
-                                escribe.add("sw "+tempo.name +" , -4($sp)");
+                       for (Temporal temp : activos) {
+                          if(!temporales_parametros.contains(temp.name)){
+                            if(!(istempf(temp.name))){
+                                escribe.add("sw "+temp.name +" , -4($sp)");
                             }
                             escribe.add("sub $sp , $sp ,4");
-                            tempos_guardados.add(tempo.name);
+                            tempos_guardados.add(temp.name);
                         }
                     }
-                    this.temps_activas.push(tempos_guardados); */
-                    break;
+                    TempActivas.push(tempos_guardados);
+                                break;
+                    case "param":
+                            if(!(istempf(CuadTable.cuadruplos.get(i).dest))){
+                       /* if(!(temporales.is_ref(CuadTable.cuadruplos.get(i).dest))){
+                        
+                        }else{
+                             dir = dir + 4;
+                             escribe.add("s.s "+quad.resultado+" , -"+dir+"($sp)");
+                             tempos.free_temp(quad.resultado);
+                        }*
+                    }else{*/
+                        if(istemp(CuadTable.cuadruplos.get(i).dest)){
+                            tipo = temporales.get_tipo(CuadTable.cuadruplos.get(i).dest);
+                            switch(tipo){
+                                case Tipo.Int:
+                                    if(!(temporales.is_ref(CuadTable.cuadruplos.get(i).dest))){                                                       
+                                        dir = dir + 4;
+                                        escribe.add("sw "+ CuadTable.cuadruplos.get(i).dest+" , -"+dir+"($sp)");
+                                    }
+                                    break;
+                                case Tipo.Boolean:
+                                    if(!(temporales.is_ref(CuadTable.cuadruplos.get(i).dest))){                                   
+                                        dir = dir + 2;
+                                        escribe.add("sb "+CuadTable.cuadruplos.get(i).dest+" , -"+dir+"($sp)");
+                                    }
+                                    break;
+                                case Tipo.Char:
+                                    if(!(temporales.is_ref(CuadTable.cuadruplos.get(i).dest))){                                                                                                                 
+                                        temp1 = temporales.getSgteTemporal(); //es la direccion de origen
+                                        temp2 = temporales.getSgteTemporal(); //char
+                                        temp3 = temporales.getSgteTemporal();//dir destino
+                                        dir = dir + 2;
+                                        if(iscadena(CuadTable.cuadruplos.get(i).dest)){
+                                            escribe.add("la "+temp1 +" , ("+CuadTable.cuadruplos.get(i).dest+")");;
+                                        }else{
+                                            escribe.add("la "+temp1 +" , ("+CuadTable.cuadruplos.get(i).dest+")");
+                                        }
+                                        escribe.add("la "+temp3+" , -"+dir+"($sp)");
+                                        escribe.add("_begin_copy"+cont_copia_string+":");
+                                        escribe.add("lb "+temp2 +" , ("+temp1+")");
+                                        escribe.add("sb "+temp2 +" , ("+temp3+")");
+                                        escribe.add("beq "+temp2+" , $zero , _end_copy"+cont_copia_string);
+                                        escribe.add("add "+temp1+" , "+temp1+" , 1");
+                                        escribe.add("add "+temp3+" , "+temp3+" , 1");
+                                        escribe.add("b _begin_copy"+cont_copia_string);
+                                        escribe.add("_end_copy"+cont_copia_string+":");
+                                        temporales.TemporalLibre(temp1);
+                                        temporales.TemporalLibre(temp2);
+                                        temporales.TemporalLibre(temp3);
+                                        cont_copia_string++;
+                                    }
+                                    break;
+                                case Tipo.String:
+                                    if(!(temporales.is_ref(CuadTable.cuadruplos.get(i).dest))){                                                                      
+                                        temp1 = temporales.getSgteTemporal(); //es la direccion de origen
+                                        temp2 = temporales.getSgteTemporal(); //string
+                                        temp3 = temporales.getSgteTemporal();//dir destino
+                                        dir = dir + 46;
+                                        if(iscadena(CuadTable.cuadruplos.get(i).dest)){
+                                            escribe.add("la "+temp1 +" , "+CuadTable.cuadruplos.get(i).dest+"");
+                                        }else{
+                                            escribe.add("la "+temp1 +" , ("+CuadTable.cuadruplos.get(i).dest+")");
+                                        }
+                                        
+                                        escribe.add("la "+temp3+" , -"+dir+"($sp)");
+                                        escribe.add("_begin_copy"+cont_copia_string+":");
+                                        escribe.add("lb "+temp2 +" , ("+temp1+")");
+                                        escribe.add("sb "+temp2 +" , ("+temp3+")");
+                                        escribe.add("beq "+temp2+" , $zero , _end_copy"+cont_copia_string);
+                                        escribe.add("add "+temp1+" , "+temp1+" , 1");
+                                        escribe.add("add "+temp3+" , "+temp3+" , 1");
+                                        escribe.add("b _begin_copy"+cont_copia_string);
+                                        escribe.add("_end_copy"+cont_copia_string+":");
+                                        temporales.TemporalLibre(temp1);
+                                        temporales.TemporalLibre(temp2);
+                                        temporales.TemporalLibre(temp3);
+                                        cont_copia_string++;
+                                    }
+                                    temporales.TemporalLibre(CuadTable.cuadruplos.get(i).dest);                                  
+                                    break;
+                            }
+                        }else{
+                            
+                        }
+                    }
+                                break;
+                    default:
+                               // CuadTable.cuadruplos.add(new Cuadruplo("_"+CuadTable.cuadruplos.get(i).operator));
+                                escribe.add("_"+CuadTable.cuadruplos.get(i).operator+":");
+				break;
                             }
                         
 		}
          return escribe;
     }
+           
+           
+    
+    
 	
     public static boolean istemp(String s){
         if(s.startsWith("$t")){

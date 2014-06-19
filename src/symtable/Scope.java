@@ -24,6 +24,7 @@ public class Scope {
         public boolean Referencia;
         public int direccion;
         public Simbolo s;
+        public ArrayList<Scope> Scop;
 	public ArrayList<Variable> variables;
 	public ArrayList<Funcion> funciones;
 	public ArrayList<Sub> subs;
@@ -50,6 +51,7 @@ public class Scope {
 		this.linea = linea;
 		this.columna = columna;
 		this.offset = offset;
+                this.Scop = new ArrayList<>();
 		this.variables = new ArrayList<>();
 		this.funciones = new ArrayList<>();
 		this.subs = new ArrayList<>();
@@ -90,7 +92,19 @@ public class Scope {
 		}
 	}
         
-        
+        public Scope findVar1(String id){
+		for (Scope p:this.Scop){
+			if (p.id.equalsIgnoreCase(id)){
+				return p;
+			}
+		}
+		
+		if (this.padre == null){
+			return null;
+		}else{
+			return this.padre.findVar1(id);
+		}
+	}
         /*
         public Scope findVar1(String id){
         return findvar2(id,0);

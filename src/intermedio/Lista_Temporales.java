@@ -80,25 +80,26 @@ public class Lista_Temporales {
         return result;
     }
     
-    public void TemporalLibre(String name){
+    public String TemporalLibre(String name){
         for (int i = 0; i < NumTemporales; i++) {
             if(temporales[i].name.equalsIgnoreCase(name)){
                 temporales[i].available = true;
-                return;
+                return name;
             }
         }
         for (int i = 0; i < NTemporalesS; i++) {
             if(this.temp_s[i].name.equalsIgnoreCase(name)){
                 temp_s[i].available = true;
-                return;
+                return name;
             }
         }
         for (int i = 0; i < temp_f.length ; i++) {
             if(temp_f[i].name.equalsIgnoreCase(name)){
                 temp_f[i].available = true;
-                return;
+                return name;
             }
         }
+        return name;
     }
     
     
@@ -241,6 +242,7 @@ public class Lista_Temporales {
         }
         for (int i = 0; i < temp_f.length ; i++) {
             if(!temp_f[i].available){
+                System.out.println("kkkkkkkkkk"+i); //probando por no guarda
                 tempactivos.add(temp_f[i]);
             }
         }
