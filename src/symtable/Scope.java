@@ -19,11 +19,30 @@ public class Scope {
 	public Integer columna;
 	public Integer offset;
         public String id;
+        public int tipo;
+        public int Saltos;
+        public boolean Referencia;
+        public int direccion;
+        public Simbolo s;
 	public ArrayList<Variable> variables;
 	public ArrayList<Funcion> funciones;
 	public ArrayList<Sub> subs;
 	public ArrayList<TypeStruct> typeStructs;
 	private final ArrayList<String> primitiveTypes;
+        
+        /*
+        public Scope(String id, int tipo, Scope padre){
+            this.id = id;
+            this.tipo = tipo;
+            this.padre = padre;
+            this.direccion = 0;
+            this.Referencia = false;
+            if(padre!=null){
+                this.nombre = padre.nombre+"_"+id;
+             }else{
+             this.nombre = "";
+            }
+        }*/
 	
 	public Scope(Scope padre, String nombre, Integer linea, Integer columna, Integer offset){
 		this.padre = padre;
@@ -70,8 +89,31 @@ public class Scope {
 			return this.padre.findVar(id);
 		}
 	}
+        
+        
         /*
         public Scope findVar1(String id){
+        return findvar2(id,0);
+	}
+        
+        
+        public Scope findVar2(String id, int saltos){
+		 if(this.ID.equalsIgnoreCase(nombre)){
+                     this.saltos = saltos;
+                     return this.saltos;
+        }
+        
+        
+        if(this.padre == null){
+            return null;
+        }else {
+           
+            return padre.findVar3(nombre,saltos +1 );
+        }
+	}
+        
+        
+        public Scope findVar3(String id){
 		for (Scope s:this.id){
 			if (s.id.equalsIgnoreCase(id)){
 				return s;
@@ -215,6 +257,35 @@ public class Scope {
 	public String ubicacion(){
 		return "lin " + this.linea + ", col " + this.columna + ", offset " + this.offset;
 	}
+        
+        public int getTipo(){
+            tipo= Integer.parseInt(s.tipo);
+            return tipo;
+        }
+        
+        public int getdireccion(){
+        return direccion;
+    }
+
+
+
+
+
+
+    public Sub findSub(String id){
+		for (Sub s:this.subs){
+			if (s.id.equalsIgnoreCase(id)){
+				return s;
+			}
+		}
+		
+		if (this.padre == null){
+			return null;
+		}else{
+			return this.padre.findSub(id);
+		}
+	}
+
         
         
 	@Override
