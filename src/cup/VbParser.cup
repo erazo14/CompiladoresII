@@ -210,7 +210,9 @@ non terminal		Distinto;
 
 non terminal		Negativo;
 
-non terminal		MethodCall, LineEnd;
+non terminal		Simbolo MethodCall;
+
+non terminal             LineEnd;
 
 non terminal		Termino Property;
 
@@ -267,7 +269,7 @@ VarDecl					::= Dim Id As Tipo:tipo {:
 
 SubDecl					::= Sub Id {: 
 								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
-                                                                CuadTable.gen(myid.value.toString());
+
 								if (SymTable.curScope.hasSub(myid.value.toString())){
 									parser.syntax_error(myid);
 									parser.appendErr("Sub \"" + myid.value.toString() + "\" ya existe");
@@ -279,7 +281,7 @@ SubDecl					::= Sub Id {:
 										SymTable.existeMain = true;
 									}
 								}
-								
+								CuadTable.gen(myid.value.toString());
 								Sub newSub = new Sub(myid.value.toString(), myid.left, myid.right, myid.offset);
 								SymTable.curScope.addSub(newSub);
 								SymTable.curMethod = newSub;
@@ -299,7 +301,7 @@ FuncDecl				::= Function Id {:
 									parser.syntax_error(myid);
 									parser.appendErr("Ya existe un Sub llamado \"" + myid.value.toString() + "\"");
 								}
-								
+								CuadTable.gen(myid.value.toString());
 								Funcion newFunc = new Funcion(myid.value.toString(), myid.left, myid.right, myid.offset, "void");
 								SymTable.curScope.addFunc(newFunc);
 								SymTable.curMethod = newFunc;
@@ -695,7 +697,7 @@ ForLoop					::= For Id Igual Expresion:e1 M:m1 To Expresion:e2 M:m2 LineEnd {:
                                                                  lstFal =CuadTable.makeList(CuadTable.sigCuad);
                                                                 CuadTable.gen("goto","");
                                                                 
-						:} Block:b Next Id {:
+						:}E Block:b Next Id {:
 								SymTable.endScope();
                                                                 String temp = CuadTable.newTemp();
                                                                 Simbolo nuevo = new Simbolo("",0,0,0,"");
@@ -868,18 +870,20 @@ Distinto				::= Menor Mayor;
 Negativo				::= Menos;
 
 MethodCall				::= FuncEval
-						|	Call FuncEval;
+						|	Call FuncEval ;
 
 FuncEval				::= Id Args:args {:
 								MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top-1);
 								Funcion f = SymTable.curScope.findFunc(myid.value.toString());
-
-								if (f == null){
+                                                                Sub s = SymTable.curScope.findSub(myid.value.toString());
+								if (f == null && s == null){
 									parser.syntax_error(myid);
 									parser.appendErr("La funcion \"" + myid.value.toString() + "\" no ha sido declarada");
 									RESULT = null;
 								}else{
-									if (f.parametros.size() != args.size()){
+                                                                    if(f != null){
+                                                                        CuadTable.gen("Call",myid.value.toString(),f.tipo);
+                                                                        if (f.parametros.size() != args.size()){
 										parser.syntax_error(myid);
 										parser.appendErr("La funcion \"" + myid.value.toString() + "\" recibe " + f.parametros.size() + " argumentos. Se pasaron " + args.size());
 										RESULT = null;
@@ -891,7 +895,23 @@ FuncEval				::= Id Args:args {:
 											}
 										}
 									}
-									RESULT = new Termino(myid.value.toString(), myid.left, myid.right, myid.offset, f.tipo, CuadTable.newTemp());
+                                                                        RESULT = new Termino(myid.value.toString(), myid.left, myid.right, myid.offset, f.tipo, CuadTable.newTemp());
+                                                                    }else{
+                                                                        CuadTable.gen("Call",myid.value.toString());   // pendientes del tipo
+                                                                        if (s.parametros.size() != args.size()){
+										parser.syntax_error(myid);
+										parser.appendErr("La funcion \"" + myid.value.toString() + "\" recibe " + s.parametros.size() + " argumentos. Se pasaron " + args.size());
+										RESULT = null;
+									}else{
+										for (int i = 0; i < s.parametros.size(); i++){
+											if (!s.parametros.get(i).tipo.equalsIgnoreCase(args.get(i).tipo)){
+												parser.syntax_error(myid);
+												parser.appendErr("El argumento en la posicion " + (i + 1) + " es \"" + args.get(i).tipo + "\", debe ser \"" + s.parametros.get(i).tipo);
+											}
+										}
+									}
+                                                                        RESULT = new Termino(myid.value.toString(), myid.left, myid.right, myid.offset, s.tipo, CuadTable.newTemp());
+                                                                    }
 								}
 						:};
 
