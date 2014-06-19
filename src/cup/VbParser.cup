@@ -254,12 +254,13 @@ RootStmt				::= VarDecl LineEnd
 
 Consola                                 ::= Write Id {:
                                                         MyToken myid = (MyToken)CUP$VbParser$stack.elementAt(CUP$VbParser$top);
-                                                        System.out.println("rrrrrrrrrrrrrrrrrrrrrr"+myid.value.toString());
                                                         Variable input;
                                                         input = SymTable.curScope.findVar(myid.value.toString());
                                                         if(input != null){
-                                           //                 CuadTable.gen("write",input.tipo,input.id);
-                                                            System.out.println("yyyyyyyyyyyyyyyyyyy"+input.id);
+                                                            CuadTable.gen("write",input.tipo,input.id);
+                                                        }else{
+                                                            parser.syntax_error(myid);
+                                                            parser.appendErr("La variable \"" + myid.value.toString() + "\" no ha sido declarada"); 
                                                         }
                                                     :}
                                                 |       Read Termino;

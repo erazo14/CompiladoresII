@@ -75,6 +75,8 @@ public class Cuadruplo {
                             return this.operator + " _" + this.dest;
                         case "param":
                             return this.operator+ " " + this.operand1;
+                        case "write":
+                            return this.operator+ " " + this.operand1+"  Tipo:   " +this.dest;
 			default:
 				return this.operator + ":";
 		}
