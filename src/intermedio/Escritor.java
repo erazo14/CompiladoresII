@@ -21,7 +21,7 @@ public class Escritor {
         PrintWriter pw = null;
         try
         {
-            fichero = new FileWriter(archivo+".asm");
+            fichero = new FileWriter("./src/"+archivo+".asm");
             pw = new PrintWriter(fichero);
 
                  for (int i=0;i<instrucciones.size();i++){

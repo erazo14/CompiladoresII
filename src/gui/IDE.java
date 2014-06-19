@@ -80,6 +80,7 @@ public class IDE extends javax.swing.JFrame {
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
         jMenu3 = new javax.swing.JMenu();
+        jMenu5 = new javax.swing.JMenu();
 
         jMenu4.setText("jMenu4");
 
@@ -116,13 +117,20 @@ public class IDE extends javax.swing.JFrame {
         jMenuBar1.add(jMenu2);
 
         jMenu3.setText("Ver CI");
-        jMenu3.setRolloverEnabled(false);
         jMenu3.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jMenu3MouseClicked(evt);
             }
         });
         jMenuBar1.add(jMenu3);
+
+        jMenu5.setText("Ver CF");
+        jMenu5.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jMenu5MouseClicked(evt);
+            }
+        });
+        jMenuBar1.add(jMenu5);
 
         setJMenuBar(jMenuBar1);
 
@@ -150,6 +158,13 @@ public class IDE extends javax.swing.JFrame {
 		viewer.setVisible(true);
     }//GEN-LAST:event_jMenu3MouseClicked
 
+    private void jMenu5MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenu5MouseClicked
+        // TODO add your handling code here:
+        Final viewer = new Final();
+        viewer.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        viewer.setVisible(true);
+    }//GEN-LAST:event_jMenu5MouseClicked
+
 	
 	/**
 	 * @param args the command line arguments
@@ -160,6 +175,7 @@ public class IDE extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenu jMenu4;
+    private javax.swing.JMenu jMenu5;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSplitPane jSplitPane1;

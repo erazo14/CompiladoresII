@@ -18,6 +18,7 @@ public class Scope {
 	public Integer linea;
 	public Integer columna;
 	public Integer offset;
+        public String id;
 	public ArrayList<Variable> variables;
 	public ArrayList<Funcion> funciones;
 	public ArrayList<Sub> subs;
@@ -69,7 +70,21 @@ public class Scope {
 			return this.padre.findVar(id);
 		}
 	}
-	
+        /*
+        public Scope findVar1(String id){
+		for (Scope s:this.id){
+			if (s.id.equalsIgnoreCase(id)){
+				return s;
+			}
+		}
+		
+		if (this.padre == null){
+			return null;
+		}else{
+			return this.padre.findVar(id);
+		}
+	}
+	*/
 	public boolean hasLocalVar(String id){
 		for (Variable v:this.variables){
 			if (v.id.equalsIgnoreCase(id)){
